@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from torch import optim
 from model import YOLOv1
 from dataset import VOCDataset, Compose
-from utils import get_bboxes, load_checkpoint
+from utils import get_bboxes, load_checkpoint, plot_image
 
 
 LOAD_MODEL_FILE = "/home/kpatel2s/kpatel2s/best_model.pth"
@@ -41,17 +41,24 @@ pred_boxes, true_boxes = get_bboxes(
     test_loader, model, iou_threshold=0.5, threshold=0.4
 )
 
-from utils import plot_image
-plot_image(test_dataset[0][0].permute(1,2,0).to("cpu"), pred_boxes)
-plot_image(test_dataset[0][0].permute(1,2,0).to("cpu"), true_boxes)
+# Plot the image with bboxes
+id = 0
+p_boxes = []
+gt_boxes = []
+for i, (X, y) in enumerate(test_loader):
+    # filter boxes with ids
+    temp_id = pred_boxes[id][0]
+    p_boxes.append(pred_boxes[id])
+    gt_boxes.append(true_boxes[id])
+    for idx, box in enumerate(pred_boxes[id+1:]):
+        if box[0] == temp_id:
+            p_boxes.append(box)
+            gt_boxes.append(true_boxes[id+idx+1])
+        else:
+            break
 
-from utils import mean_average_precision
+    plot_image(X[0].permute(1,2,0).to("cpu"), gt_boxes)
 
-mean_avg_prec = mean_average_precision(
-    pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint"
-)
-
-print(mean_avg_prec)
-
-
-
+    id += 1
+    p_boxes = []
+    gt_boxes = []

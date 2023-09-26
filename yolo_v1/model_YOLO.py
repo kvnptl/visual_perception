@@ -284,13 +284,13 @@ torch.cuda.manual_seed(seed)
 # Hyperparameters
 learning_rate = 2e-5
 device = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 weight_decay = 0
 EPOCHS = 100
-NUM_WORKERS = os.cpu_count()
+NUM_WORKERS = 8 # os.cpu_count()
 PIN_MEMORY = True
 LOAD_MODEL = False
-LOAD_MODEL_FILE = "overfit.pth.tar"
+LOAD_MODEL_FILE = "/home/kpatel2s/kpatel2s/overfit_8examples_iou_0.75.pth"
 IMG_DIR = "/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/images"
 LABEL_DIR = "/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/labels"
 
@@ -341,14 +341,14 @@ if LOAD_MODEL:
     load_checkpoint(torch.load(LOAD_MODEL_FILE), model, optimizer)
 
 train_dataset = VOCDataset(
-    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
+    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/8examples.csv",
     transform=transform,
     img_dir=IMG_DIR,
     label_dir=LABEL_DIR,
 )
 
 test_dataset = VOCDataset(
-    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
+    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/8examples.csv",
     transform=transform,
     img_dir=IMG_DIR,
     label_dir=LABEL_DIR,
@@ -397,14 +397,14 @@ for idx, epoch in enumerate(loop):
     # loop.set_postfix(mean_avg_prec=mean_avg_prec)
     # print(f"Mean Average Precision: {mean_avg_prec}")
 
-    # if mean_avg_prec > 0.9:
-    #     checkpoint = {
-    #         "state_dict": model.state_dict(),
-    #         "optimizer": optimizer.state_dict(),
-    #     }
-    #     save_checkpoint(checkpoint, "overfit.pth.tar")
-    #     import time
-    #     time.sleep(10)
+    if mean_avg_prec > 0.95:
+        checkpoint = {
+            "state_dict": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+        }
+        save_checkpoint(checkpoint, "overfit_8examples_iou_0.6.pth")
+        import time
+        time.sleep(10)
 
     loss_val = train_fn(train_loader, model, optimizer, loss_fn)
 

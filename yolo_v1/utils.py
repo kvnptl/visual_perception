@@ -204,12 +204,16 @@ def plot_image(image, boxes):
     im = np.array(image)
     height, width, _ = im.shape
 
+     # Create figure 
+    fig, ax = plt.subplots(1)
+    ax.imshow(im)
+
     # box[0] is x midpoint, box[2] is width
     # box[1] is y midpoint, box[3] is height
 
     # Create a Rectangle potch
     for box in boxes:
-        box = box[3:]
+        box = box[2:]
         assert len(box) == 4, "Got more values than in x, y, w, h, in a box!"
         upper_left_x = box[0] - box[2] / 2
         upper_left_y = box[1] - box[3] / 2
@@ -222,7 +226,11 @@ def plot_image(image, boxes):
             facecolor="none",
         )
 
+        ax.add_patch(rect)
+
     # draw bounding boxes on the image and save
+    plt.savefig('image_with_boxes.png')
+    plt.close()
 
 
 def get_bboxes(
