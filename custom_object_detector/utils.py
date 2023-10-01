@@ -49,7 +49,7 @@ def set_seed(seed=8):
     torch.cuda.manual_seed(seed)
 
 # Plot loss curves of a model
-def plot_loss_curves(results):
+def plot_loss_curves(results, save_fig=False):
     """Plots training curves of a results dictionary.
 
     Args:
@@ -111,7 +111,10 @@ def plot_loss_curves(results):
     plt.legend()
     plt.grid()
 
-def create_confusion_matrix(model, test_loader, class_names, device):
+    if save_fig:
+        plt.savefig('loss_acc_curves.png')
+
+def create_confusion_matrix(model, test_loader, class_names, device, save_fig=False):
 
   # Track predictions and true labels
   y_true = []
@@ -130,12 +133,15 @@ def create_confusion_matrix(model, test_loader, class_names, device):
   conf_mat = confusion_matrix(y_true, y_pred)
 
   # Plot confusion matrix
+  # create a figure
+  plt.figure(figsize=(10, 10))
   plt.imshow(conf_mat, interpolation='nearest', cmap=plt.cm.Blues)
   plt.title("Confusion matrix")
   plt.colorbar()
   plt.xticks(np.arange(len(class_names)), class_names, rotation='vertical')
   plt.yticks(np.arange(len(class_names)), class_names)
-  # plt.savefig('conf_mat.png')
+  if save_fig:
+    plt.savefig('conf_mat.png')
 
 def pred_and_plot_img(model,
                       img_path,

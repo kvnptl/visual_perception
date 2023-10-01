@@ -1,6 +1,7 @@
 import os
 
-DATASET = "dataset/standford_dogs_mini_10"
+PARENT_DIR = os.path.dirname(__file__)
+DATASET = os.path.join(PARENT_DIR, "dataset/standford_dogs_mini_10")
 NUM_WORKERS = os.cpu_count()
 BATCH_SIZE = 32
 PIN_MEMORY = True
