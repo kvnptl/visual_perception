@@ -7,6 +7,11 @@ from sklearn.metrics import confusion_matrix
 from torchvision import transforms as T
 from pathlib import Path
 
+from typing import List, Tuple
+from PIL import Image
+import cv2
+import config
+
 def xywh_to_xyxy(xywh):
     """
     Convert XYWH format (x,y center point and width, height) to XYXY format (x,y top left and x,y bottom right).
@@ -26,6 +31,16 @@ def readFile(path):
     with open(path, 'r') as f:
         lines = f.readlines()
     return lines
+
+def crawl_through_dir(dir_path):
+    file_paths = []
+    for root, directories, files in os.walk(dir_path):
+        for filename in files: 
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+    
+    file_paths = sorted(file_paths)
+    return file_paths
 
 def set_seed(seed=8):
     random.seed(seed)
@@ -120,11 +135,7 @@ def create_confusion_matrix(model, test_loader, class_names, device):
   plt.colorbar()
   plt.xticks(np.arange(len(class_names)), class_names, rotation='vertical')
   plt.yticks(np.arange(len(class_names)), class_names)
-  plt.savefig('conf_mat.png')
-
-from typing import List, Tuple
-from PIL import Image
-from torchvision import transforms
+  # plt.savefig('conf_mat.png')
 
 def pred_and_plot_img(model,
                       img_path,
@@ -132,17 +143,19 @@ def pred_and_plot_img(model,
                       img_size,
                       transform,
                       device):
+    
+    ground_truth_label = img_path.split("/")[-2].split("-")[-1]
 
     img = Image.open(img_path)
+    img = img.resize(size=img_size)
 
     if transform is not None:
         img_transform = transform
     else:
-        img_transform = transforms.Compose([
-            transforms.Resize(img_size),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
+        img_transform = T.Compose([
+            T.Resize((224, 224)),
+            T.ToTensor(),
+            T.Normalize(mean=config.MEAN, std=config.STD)
         ])
 
     model.to(device)
@@ -154,12 +167,80 @@ def pred_and_plot_img(model,
         img_tensor = img_tensor.to(device)
         prediction = model(img_tensor)
 
-    pred_probs = torch.softmax(prediction, dim=1)
-    pred_class = torch.argmax(pred_probs, dim=1)
+    classPred = prediction[0]
+    bboxPred = prediction[1]
 
-    plt.figure()
-    plt.imshow(img)
-    plt.title(f"Prediction: {class_names[pred_class]} | Prob: {pred_probs.max():.3f}")
+    (startX, startY, endX, endY) = bboxPred[0]
+
+    # determine the class label with the largest predicted
+	# probability
+    class_label = torch.argmax(classPred).item()
+    label = class_names[class_label]
+
+    # scale the bounding box coordinates
+    startX = int(startX * img.size[0])
+    startY = int(startY * img.size[1])
+    endX = int(endX * img.size[0])
+    endY = int(endY * img.size[1])
+
+    # convert PIL image to OpenCV
+    image = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+    # draw the bounding box
+    box_color = (0, 255, 0) if str(label.lower()) == ground_truth_label.lower() else (0, 0, 255)
+    cv2.rectangle(image, (startX, startY), (endX, endY), box_color, 2)
+    cv2.putText(image, str(label), (startX, startY + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+    # show the output image 
+    # cv2.imwrite("output_test_pred.jpg", image)
+
+    # convert BGR to RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    return image, str(label), ground_truth_label
+
+def visualize_dataset(dataloader):
+    # Set figure size
+    plt.figure(figsize=(20, 20)) 
+
+    # Set subplot parameters
+    plt.subplots(nrows=3, ncols=3, figsize=(7, 7))
+
+    # # Visualize random 9 images in 3x3 grid
+    for i in range(9):
+        plt.subplot(3, 3, i+1)
+        idx = random.randint(0, len(dataloader.dataset))
+        image, annotation_cls, annotation_bbox = dataloader.dataset[idx][0].permute(1, 2, 0).numpy(), dataloader.dataset[idx][1], dataloader.dataset[idx][2]
+        # image
+        image = image * config.STD + config.MEAN
+        image = np.clip(image, 0, 1)
+        image = (image * 255).astype(np.uint8)
+        # plt.imshow(image)
+        # annotation
+        label = annotation_cls.numpy()
+        bbox = annotation_bbox.numpy()
+
+        # scale the bounding box coordinates
+        startX = int(bbox[0] * image.shape[1])
+        startY = int(bbox[1] * image.shape[0])
+        endX = int(bbox[2] * image.shape[1])
+        endY = int(bbox[3] * image.shape[0])
+
+        # convert PIL image to OpenCV
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+        # draw the bounding box
+        cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
+        cv2.putText(image, str(config.CLASS_NAMES[int(label)]), (startX, startY + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+        # convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        plt.imshow(image)
+        plt.title(f"Label: {config.CLASS_NAMES[int(label)]}")
+        plt.axis("off")
+
+    plt.tight_layout()
 
 def save_model(model: torch.nn.Module,
                target_dir: str,

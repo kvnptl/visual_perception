@@ -21,7 +21,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 import torchvision
-from utils import xywh_to_xyxy, readFile, set_seed
+from utils import xywh_to_xyxy, readFile, set_seed, crawl_through_dir
 
 NUM_WORKERS = os.cpu_count()
 # specify ImageNet mean and standard deviation
@@ -51,8 +51,8 @@ class create_dataset(Dataset):
         self.transforms = transforms
 
         # read the image file paths
-        images_list = self.crawl_through_dir(images_path)
-        annotations_list = self.crawl_through_dir(annotations_path)
+        images_list = crawl_through_dir(images_path)
+        annotations_list = crawl_through_dir(annotations_path)
 
         # random shuffle the images and annotations
         data = list(zip(images_list, annotations_list))
@@ -85,7 +85,10 @@ class create_dataset(Dataset):
         # NOTE: the current network is designed to work with only one bounding box per image
         annot_tensor = annot_tensor[0]
 
-        return (img_tensor, annot_tensor)
+        class_tensor = annot_tensor[0].to(torch.int64)
+        bbox_tensor = annot_tensor[1:]
+
+        return (img_tensor, class_tensor, bbox_tensor)
     
     def getImageAndAnnotation(self, idx):
         # load the image
@@ -155,16 +158,6 @@ class create_dataset(Dataset):
         # convert to numpy
         annotations = np.array(annotations, dtype="float32")
         return annotations
-
-    def crawl_through_dir(self, dir_path):
-        file_paths = []
-        for root, directories, files in os.walk(dir_path):
-            for filename in files: 
-                filepath = os.path.join(root, filename)
-                file_paths.append(filepath)
-        
-        file_paths = sorted(file_paths)
-        return file_paths
     
     def split_dataset(self, images_list, annotations_list, val_size=0.10, test_size=0.10):
 
@@ -226,7 +219,7 @@ def main():
     )
 
     # get one sample from the training dataloader
-    image, annotation = train_dataloader.dataset[0]
+    image, annotation_cls, annotation_bbox = train_dataloader.dataset[0]
     print(image.shape)
 
     image = image.permute(1, 2, 0).numpy()
@@ -239,8 +232,8 @@ def main():
     plt.savefig("test.png")
 
     # draw the bounding box
-    label = annotation[0].numpy()
-    bbox = annotation[1:].numpy()
+    label = annotation_cls.numpy()
+    bbox = annotation_bbox.numpy()
 
     # scale the bounding box coordinates
     startX = int(bbox[0] * image.shape[1])

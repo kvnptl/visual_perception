@@ -45,10 +45,11 @@ def train_step(model: torch.nn.Module,
   for batch, (X, y_cls, y_bbox) in enumerate(dataloader):
       # Send data to target device
       X, y_cls, y_bbox = X.to(device), y_cls.to(device), y_bbox.to(device)
-      
       # 1. Forward pass
       y_pred = model(X)
-
+      print(f"y cls type: {type(y_cls)}")
+      print(f"y cls data type: {type(y_cls.data)}")
+      print(f"y cls shape : {y_cls.shape}")
       # 2. Calculate and accumulate loss
       classLoss = loss_fn[0](y_pred[0], y_cls)
       bboxLoss = loss_fn[1](y_pred[1], y_bbox)
