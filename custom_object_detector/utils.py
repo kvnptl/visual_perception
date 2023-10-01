@@ -112,7 +112,8 @@ def plot_loss_curves(results, save_fig=False):
     plt.grid()
 
     if save_fig:
-        plt.savefig('loss_acc_curves.png')
+        target_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "pred")
+        save_plot(target_dir, "loss_acc_curves.png")
 
 def create_confusion_matrix(model, test_loader, class_names, device, save_fig=False):
 
@@ -141,7 +142,8 @@ def create_confusion_matrix(model, test_loader, class_names, device, save_fig=Fa
   plt.xticks(np.arange(len(class_names)), class_names, rotation='vertical')
   plt.yticks(np.arange(len(class_names)), class_names)
   if save_fig:
-    plt.savefig('conf_mat.png')
+    target_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "pred")
+    save_plot(target_dir, "conf_mat.png")
 
 def pred_and_plot_img(model,
                       img_path,
@@ -210,7 +212,7 @@ def pred_and_plot_img(model,
 
     return image, str(label), ground_truth_label
 
-def visualize_dataset(dataloader):
+def visualize_dataset(dataloader, save_fig=False):
     # Set figure size
     plt.figure(figsize=(20, 20)) 
 
@@ -252,6 +254,14 @@ def visualize_dataset(dataloader):
         plt.axis("off")
 
     plt.tight_layout()
+    if save_fig:
+        target_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "pred")
+        save_plot(target_dir, "visualize_dataset.png")
+
+def save_plot(target_dir: str, filename: str):
+    target_dir_path = Path(target_dir)
+    target_dir_path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(os.path.join(target_dir, filename))
 
 def save_model(model: torch.nn.Module,
                target_dir: str,
@@ -276,9 +286,10 @@ def save_model(model: torch.nn.Module,
   
   # Create model save path
   assert model_name.endswith(".pth") or model_name.endswith(".pt"), "model_name should end with '.pt' or '.pth'"
-  model_save_path = target_dir_path / model_name
+
+  model_save_path = os.path.join(target_dir_path, model_name)
 
   # Save the model state_dict()
-  print(f"[INFO] Saving model to: {model_save_path}")
+  # print(f"[INFO] Saving model to: {model_save_path}")
   torch.save(obj=model.state_dict(),
              f=model_save_path)

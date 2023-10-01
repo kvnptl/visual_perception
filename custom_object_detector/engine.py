@@ -1,11 +1,14 @@
 
+import os
+import glob
 import torch
-
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import torchmetrics
+from utils import save_model as model_save
+import config
 from torch.utils.tensorboard import SummaryWriter
 
 def train_step(model: torch.nn.Module, 
@@ -199,7 +202,8 @@ def train(model: torch.nn.Module,
           loss_fn: tuple, 
           epochs: int,
           device: torch.device,
-          writer: SummaryWriter) -> Dict[str, List[float]]:
+          writer: SummaryWriter,
+          save_model: bool) -> Dict[str, List[float]]:
   """Trains and tests a PyTorch model.
 
   Passes a target PyTorch models through train_step() and test_step()
@@ -241,6 +245,9 @@ def train(model: torch.nn.Module,
       "valid_bbox_loss": [],
       "valid_acc": [],
   }
+
+  test_acc_threshold = 0.6
+  timestamp = config.TIMESTAMP
   
   # Loop through training and testing steps for a number of epochs
   for epoch in tqdm(range(epochs)):
@@ -294,11 +301,32 @@ def train(model: torch.nn.Module,
                             tag_scalar_dict={"train_acc": train_acc,
                                             "valid_acc": test_acc},
                             global_step=epoch)
-          
-          writer.close()
-        
       else:
          pass
+      
+      # Save model
+      if save_model:
+          model_save_path = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, timestamp, "model")
+          # save based on best validation accuracy
+          if test_acc > test_acc_threshold:
+              
+              try:
+                # remove previous best model
+                prev_model = glob.glob(os.path.join(model_save_path, "best_model_*.pth"))[0]
+                if os.path.exists(prev_model):
+                    os.remove(prev_model)
+                else:
+                    pass
+              except:
+                  pass
+              
+              model_save(model=model,
+                        target_dir=model_save_path,
+                        model_name=f"best_model_{epoch+1}.pth")
+
+              test_acc_threshold = test_acc
+        
+  writer.close()
 
   # Return the filled results at the end of the epochs
   return results

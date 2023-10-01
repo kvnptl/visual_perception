@@ -32,10 +32,11 @@ from utils import (
     set_seed, 
     plot_loss_curves, 
     create_confusion_matrix, 
-    save_model, 
+    save_model as model_save, 
     pred_and_plot_img, 
     crawl_through_dir, 
-    visualize_dataset)
+    visualize_dataset,
+    save_plot)
 import config
 import dataset
 
@@ -102,11 +103,9 @@ print(f"class_names: {config.CLASS_NAMES}")
 
 # ### Visualize samples from the dataset
 
-visualize_dataset(train_dataloader)
-
+visualize_dataset(train_dataloader, save_fig=True)
 
 # ### Setup the model
-
 
 # Create the network
 weights = torchvision.models.ResNet50_Weights.DEFAULT
@@ -158,13 +157,13 @@ def create_write(experiment_name: str,
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
 
     if extra:
-        los_dir = os.path.join("runs", experiment_name, timestamp, model_name, extra)
+        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "runs", extra)
     else:
-        los_dir = os.path.join("runs", experiment_name, timestamp, model_name)
+        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "runs")
 
-    print(f"[INFO] Created SummaryWriter directory: {los_dir}")
+    print(f"[INFO] Created SummaryWriter directory: {log_dir}")
 
-    return SummaryWriter(log_dir=los_dir)
+    return SummaryWriter(log_dir=log_dir)
 
 
 # ### Train the model
@@ -184,14 +183,16 @@ results = engine.train(model=model,
                        loss_fn=loss_fn,
                        epochs=EPOCHS,
                        device=device,
-                       writer=model_writer)
+                       writer=model_writer,
+                       save_model=True)
 
 end_time = timer()
 print(f"Time elapsed: {end_time - start_time:.3f} seconds")
 
 # Save model
-save_model(model=model, target_dir="models", model_name=f"model_{EPOCHS}.pth")
-
+model_save_path = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "model")
+model_save(model=model, target_dir=model_save_path, model_name=f"last_epoch_{EPOCHS}.pth")
+print(f"[INFO] Last epoch Model saved to: {model_save_path}")
 
 # Evaluation
 plot_loss_curves(results=results, save_fig=True)
@@ -243,17 +244,8 @@ for i, test_img in enumerate(test_img_path_sample):
         plt.title(f"Pred: {label.lower()} | GT: {gt_label.lower()}")
 
 plt.tight_layout(pad=2.0)
-plt.savefig("output_test_pred.jpg")
 
-# ### Benchmark on Test dataset
-
-
-# # TODO
-# 
-# - ~~add tensorboard~~
-# - ~~add mAP metric from torchmetrics~~
-# - ~~make modular code~~
-# - save best model based on validation loss
-# - separate inference script
+target_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "pred")
+save_plot(target_dir, "output_test_pred.png")
 
 

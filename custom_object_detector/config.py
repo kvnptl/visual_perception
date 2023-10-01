@@ -1,7 +1,9 @@
 import os
+from datetime import datetime
 
+DATASET_NAME = "standford_dogs_mini_10"
 PARENT_DIR = os.path.dirname(__file__)
-DATASET = os.path.join(PARENT_DIR, "dataset/standford_dogs_mini_10")
+DATASET = os.path.join(PARENT_DIR, "dataset", DATASET_NAME)
 NUM_WORKERS = os.cpu_count()
 BATCH_SIZE = 32
 PIN_MEMORY = True
@@ -14,6 +16,8 @@ EPOCHS = 50
 
 LOAD_MODEL = False
 MODEL_PATH = "model_50.pth"
+
+TIMESTAMP = datetime.now().strftime("%Y-%m-%d_%H-%M")
 
 # ImageNet mean and standard deviation
 MEAN = [0.485, 0.456, 0.406]
