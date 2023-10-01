@@ -60,16 +60,16 @@ def plot_loss_curves(results):
              "test_acc": [...]}
     """
     loss = results["train_loss"]
-    test_loss = results["test_loss"]
+    test_loss = results["valid_loss"]
 
     cls_loss = results["train_cls_loss"]
-    test_cls_loss = results["test_cls_loss"]
+    test_cls_loss = results["valid_cls_loss"]
 
     bbox_loss = results["train_bbox_loss"]
-    test_bbox_loss = results["test_bbox_loss"]
+    test_bbox_loss = results["valid_bbox_loss"]
 
     accuracy = results["train_acc"]
-    test_accuracy = results["test_acc"]
+    test_accuracy = results["valid_acc"]
 
     epochs = range(len(results["train_loss"]))
 
@@ -78,7 +78,7 @@ def plot_loss_curves(results):
     # Plot loss
     plt.subplot(1, 4, 1)
     plt.plot(epochs, loss, label="train_loss")
-    plt.plot(epochs, test_loss, label="test_loss")
+    plt.plot(epochs, test_loss, label="valid_loss")
     plt.title("Loss")
     plt.xlabel("Epochs")
     plt.legend()
@@ -87,7 +87,7 @@ def plot_loss_curves(results):
     # Plot accuracy
     plt.subplot(1, 4, 2)
     plt.plot(epochs, accuracy, label="train_accuracy")
-    plt.plot(epochs, test_accuracy, label="test_accuracy")
+    plt.plot(epochs, test_accuracy, label="valid_accuracy")
     plt.title("Accuracy")
     plt.xlabel("Epochs")
     plt.legend()
@@ -96,7 +96,7 @@ def plot_loss_curves(results):
     # Plot cls loss
     plt.subplot(1, 4, 3)
     plt.plot(epochs, cls_loss, label="train_cls_loss")
-    plt.plot(epochs, test_cls_loss, label="test_cls_loss")
+    plt.plot(epochs, test_cls_loss, label="valid_cls_loss")
     plt.title("Cls Loss")
     plt.xlabel("Epochs")
     plt.legend()
@@ -105,7 +105,7 @@ def plot_loss_curves(results):
     # Plot bbox loss
     plt.subplot(1, 4, 4)
     plt.plot(epochs, bbox_loss, label="train_bbox_loss")
-    plt.plot(epochs, test_bbox_loss, label="test_bbox_loss")
+    plt.plot(epochs, test_bbox_loss, label="valid_bbox_loss")
     plt.title("Bbox Loss")
     plt.xlabel("Epochs")
     plt.legend()

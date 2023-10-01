@@ -5,6 +5,7 @@ from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+from torch.utils.tensorboard import SummaryWriter
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
@@ -145,7 +146,8 @@ def train(model: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
           loss_fn: tuple, 
           epochs: int,
-          device: torch.device) -> Dict[str, List[float]]:
+          device: torch.device,
+          writer: SummaryWriter) -> Dict[str, List[float]]:
   """Trains and tests a PyTorch model.
 
   Passes a target PyTorch models through train_step() and test_step()
@@ -182,10 +184,10 @@ def train(model: torch.nn.Module,
       "train_cls_loss": [],
       "train_bbox_loss": [],
       "train_acc": [],
-      "test_loss": [],
-      "test_cls_loss": [],
-      "test_bbox_loss": [],
-      "test_acc": [],
+      "valid_loss": [],
+      "valid_cls_loss": [],
+      "valid_bbox_loss": [],
+      "valid_acc": [],
   }
   
   # Loop through training and testing steps for a number of epochs
@@ -222,6 +224,29 @@ def train(model: torch.nn.Module,
       results["valid_cls_loss"].append(test_cls_loss)
       results["valid_bbox_loss"].append(test_bbox_loss)
       results["valid_acc"].append(test_acc)
+
+      if writer:
+          writer.add_scalars(main_tag="Loss",
+                            tag_scalar_dict={"train_loss": train_loss,
+                                            "valid_loss": test_loss},
+                            global_step=epoch)
+          writer.add_scalars(main_tag="Class Loss",
+                            tag_scalar_dict={"train_cls_loss": train_cls_loss,
+                                            "valid_cls_loss": test_cls_loss},
+                            global_step=epoch)
+          writer.add_scalars(main_tag="Box Loss",
+                            tag_scalar_dict={"train_bbox_loss": train_bbox_loss,
+                                            "valid_bbox_loss": test_bbox_loss},
+                            global_step=epoch)
+          writer.add_scalars(main_tag="Accuracy",
+                            tag_scalar_dict={"train_acc": train_acc,
+                                            "valid_acc": test_acc},
+                            global_step=epoch)
+          
+          writer.close()
+        
+      else:
+         pass
 
   # Return the filled results at the end of the epochs
   return results
