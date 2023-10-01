@@ -95,14 +95,14 @@ def train_step(model: torch.nn.Module,
   train_bbox_loss = train_bbox_loss / len(dataloader) 
   
   # Bbox acc using torchmetric
-  train_bbox_acc_torchmetrics = metric_bbox.compute()
+  train_bbox_acc_torchmetrics = metric_bbox.compute()["map"]
   metric_bbox.reset()
 
   # Total loss
   train_loss = train_loss / len(dataloader)
 
   # Total accuracy
-  train_acc = ((train_cls_acc_torchmetrics + train_bbox_acc_torchmetrics["map"]) / 2).item() # item() works when a tensor contains a single value, otherwise use .cpu().numpy()
+  train_acc = ((train_cls_acc_torchmetrics + train_bbox_acc_torchmetrics) / 2).item() # item() works when a tensor contains a single value, otherwise use .cpu().numpy()
 
   return train_loss, train_acc, train_cls_loss, train_cls_acc_torchmetrics, train_bbox_loss, train_bbox_acc_torchmetrics
 
@@ -178,17 +178,17 @@ def test_step(model: torch.nn.Module,
   test_cls_loss = test_cls_loss / len(dataloader)
 
   # Using torchmetric
-  test_cls_acc_torchmetrics = metric_cls.compute() # OPTION 2
+  test_cls_acc_torchmetrics = metric_cls.compute().item() # OPTION 2
   metric_cls.reset()
 
-  test_bbox_acc_torchmetrics = metric_bbox.compute()
+  test_bbox_acc_torchmetrics = metric_bbox.compute()["map"].item()  # item() works when a tensor contains a single value (scalar), otherwise use .cpu().numpy()
   test_bbox_loss = test_bbox_loss / len(dataloader)
 
   # Total loss
   test_loss = test_loss / len(dataloader)
 
   # Total accuracy
-  test_acc = ((test_cls_acc_torchmetrics + test_bbox_acc_torchmetrics["map"]) / 2).item() # item() works when a tensor contains a single value, otherwise use .cpu().numpy()
+  test_acc = (test_cls_acc_torchmetrics + test_bbox_acc_torchmetrics) / 2
 
   return test_loss, test_acc, test_cls_loss, test_cls_acc_torchmetrics, test_bbox_loss, test_bbox_acc_torchmetrics
 

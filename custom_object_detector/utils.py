@@ -149,8 +149,10 @@ def pred_and_plot_img(model,
                       img_size,
                       transform,
                       device):
-    
-    ground_truth_label = img_path.split("/")[-2].split("-")[-1]
+    try:
+        ground_truth_label = img_path.split("/")[-2].split("-")[-1]
+    except:
+        ground_truth_label = None
 
     img = Image.open(img_path)
     img = img.resize(size=img_size)
@@ -193,7 +195,10 @@ def pred_and_plot_img(model,
     image = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
     # draw the bounding box
-    box_color = (0, 255, 0) if str(label.lower()) == ground_truth_label.lower() else (0, 0, 255)
+    if ground_truth_label is not None:
+        box_color = (0, 255, 0) if str(label.lower()) == ground_truth_label.lower() else (0, 0, 255)
+    else:
+        box_color = (0, 255, 0)
     cv2.rectangle(image, (startX, startY), (endX, endY), box_color, 2)
     cv2.putText(image, str(label), (startX, startY + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 

@@ -13,7 +13,7 @@ LR_RATE = 1e-4
 EPOCHS = 50
 
 LOAD_MODEL = False
-MODEL_PATH = "model_50.pt"
+MODEL_PATH = "model_50.pth"
 
 # ImageNet mean and standard deviation
 MEAN = [0.485, 0.456, 0.406]

@@ -237,7 +237,10 @@ for i, test_img in enumerate(test_img_path_sample):
                     device=device)
     plt.axis("off")
     plt.imshow(image)
-    plt.title(f"Pred: {label.lower()} | GT: {gt_label.lower()}")
+    if gt_label is None:
+        plt.title(f"Pred: {label.lower()}")
+    else:
+        plt.title(f"Pred: {label.lower()} | GT: {gt_label.lower()}")
 
 plt.tight_layout(pad=2.0)
 plt.savefig("output_test_pred.jpg")
@@ -248,8 +251,8 @@ plt.savefig("output_test_pred.jpg")
 # # TODO
 # 
 # - ~~add tensorboard~~
-# - add mAP metric from torchmetrics
-# - make modular code
+# - ~~add mAP metric from torchmetrics~~
+# - ~~make modular code~~
 # - save best model based on validation loss
 # - separate inference script
 
