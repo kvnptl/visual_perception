@@ -207,10 +207,10 @@ def train(model: torch.nn.Module,
           f"train_cls_loss: {train_cls_loss:.4f} | "
           f"train_bbox_loss: {train_bbox_loss:.4f} | "
           f"train_acc: {train_acc:.4f} | "
-          f"test_loss: {test_loss:.4f} | "
-          f"test_cls_loss: {test_cls_loss:.4f} | "
-          f"test_bbox_loss: {test_bbox_loss:.4f} | "
-          f"test_acc: {test_acc:.4f}"
+          f"valid_loss: {test_loss:.4f} | "
+          f"valid_cls_loss: {test_cls_loss:.4f} | "
+          f"valid_bbox_loss: {test_bbox_loss:.4f} | "
+          f"valid_acc: {test_acc:.4f}"
       )
 
       # Update results dictionary
@@ -218,10 +218,10 @@ def train(model: torch.nn.Module,
       results["train_cls_loss"].append(train_cls_loss)
       results["train_bbox_loss"].append(train_bbox_loss)
       results["train_acc"].append(train_acc)
-      results["test_loss"].append(test_loss)
-      results["test_cls_loss"].append(test_cls_loss)
-      results["test_bbox_loss"].append(test_bbox_loss)
-      results["test_acc"].append(test_acc)
+      results["valid_loss"].append(test_loss)
+      results["valid_cls_loss"].append(test_cls_loss)
+      results["valid_bbox_loss"].append(test_bbox_loss)
+      results["valid_acc"].append(test_acc)
 
   # Return the filled results at the end of the epochs
   return results
