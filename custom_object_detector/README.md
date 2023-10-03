@@ -18,15 +18,15 @@
 
 - Dataset samples
 
-    <img src="images/visualize_dataset.png" width="400">
+    <img src="images/visualize_dataset.png" width="500">
 
 - Model training curves
 
-    <img src="images/loss_acc_curves.png" width="400">
+    <img src="images/loss_acc_curves.png" width="600">
 
 - Model predictions
 
-    <img src="images/output_test_pred.png" width="400">
+    <img src="images/output_test_pred.png" width="500">
 
 
 
