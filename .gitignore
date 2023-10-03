@@ -164,3 +164,4 @@ cython_debug/
 #.idea/
 custom_object_detector/dataset
 custom_object_detector/runs
+custom_object_detector/results

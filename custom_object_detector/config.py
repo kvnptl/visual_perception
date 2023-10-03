@@ -14,6 +14,8 @@ NUM_CLASSES = 10
 LR_RATE = 1e-4
 EPOCHS = 50
 
+MODEL_LOG = "resnet50_batch_32"
+
 LOAD_MODEL = False
 MODEL_PATH = "model_50.pth"
 

@@ -157,9 +157,9 @@ def create_write(experiment_name: str,
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
 
     if extra:
-        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "runs", extra)
+        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, "runs", config.TIMESTAMP, extra)
     else:
-        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "runs")
+        log_dir = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, "runs", config.TIMESTAMP)
 
     print(f"[INFO] Created SummaryWriter directory: {log_dir}")
 
@@ -191,7 +191,7 @@ print(f"Time elapsed: {end_time - start_time:.3f} seconds")
 
 # Save model
 model_save_path = os.path.join(config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "model")
-model_save(model=model, target_dir=model_save_path, model_name=f"last_epoch_{EPOCHS}.pth")
+model_save(model=model, target_dir=model_save_path, model_name=f"last_epoch_{EPOCHS}_{config.MODEL_LOG}.pth")
 print(f"[INFO] Last epoch Model saved to: {model_save_path}")
 
 # Evaluation
