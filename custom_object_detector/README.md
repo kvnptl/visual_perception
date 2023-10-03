@@ -1,5 +1,11 @@
 # Custom Object Detector
 
+
+
+| <img src="https://github.com/kvnptl/object_detection/assets/47410011/0f18ef34-eb90-4791-9ac7-7f6bbce8a3ae" width="500">|
+|:--:| 
+| *Model overview, [source](https://pyimagesearch.com/2021/11/01/training-an-object-detector-from-scratch-in-pytorch/)* |
+
 ### Dataset
 - Stanford Dogs Mini 10 (Original full dataset with 120 classes: [LINK](http://vision.stanford.edu/aditya86/ImageNetDogs/))
 - Single object per image
@@ -7,6 +13,7 @@
 
 ### Model info
 
+- Model architecture graph is available [HERE](https://github.com/kvnptl/object_detection/blob/main/custom_object_detector/images/customDetector.gv.png)
 - Uses ResNet50 as backbone
 - Added a custom full connected layers for classification and bounding box regression
 - Parameters:
