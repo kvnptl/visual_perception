@@ -46,8 +46,9 @@ def main():
 
     num_classes = 10
     IMAGE_SIZE = 224
+
     # Create the network
-    basemodel = torchvision.models.resnet50(pretrained=True)
+    basemodel = torchvision.models.resnet50()
     model = ObjectDetector(basemodel, num_classes)
 
     x = torch.randn((1, 3, IMAGE_SIZE, IMAGE_SIZE))    
@@ -59,9 +60,9 @@ def main():
             row_settings=["var_names"])
 
     # # Visualize the network
-    # model_graph = draw_graph(model, x, graph_name='YOLOv3')
-    # model_graph.resize_graph(scale=1.0)
-    # model_graph.visual_graph.render(format='svg')
+    model_graph = draw_graph(model, x, expand_nested=True, graph_name='ResNet50_graph')
+    model_graph.resize_graph(scale=1.0)
+    model_graph.visual_graph.render(format='png')
 
 if __name__ == "__main__":
     main()
