@@ -41,7 +41,7 @@ class ObjectDetector(nn.Module):
 
 def main():
     # visualize the network
-    from torchview import draw_graph
+    # from torchview import draw_graph
     from torchinfo import summary
 
     num_classes = 10
@@ -54,15 +54,15 @@ def main():
     x = torch.randn((1, 3, IMAGE_SIZE, IMAGE_SIZE))    
 
     summary(model=model, 
-            input_size=(1, 3, IMAGE_SIZE, IMAGE_SIZE),
+            input_size=x.shape,
             col_names=["input_size", "output_size", "num_params", "trainable"],
             col_width=20,
             row_settings=["var_names"])
 
     # # Visualize the network
-    model_graph = draw_graph(model, x, expand_nested=True, graph_name='ResNet50_graph')
-    model_graph.resize_graph(scale=1.0)
-    model_graph.visual_graph.render(format='png')
+    # model_graph = draw_graph(model, x, expand_nested=True, graph_name='ResNet50_graph')
+    # model_graph.resize_graph(scale=1.0)
+    # model_graph.visual_graph.render(format='png')
 
 if __name__ == "__main__":
     main()

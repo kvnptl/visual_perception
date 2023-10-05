@@ -100,3 +100,30 @@ def pointnetloss(outputs, labels, m3x3, m64x64, alpha = 0.0001):
     diff3x3 = id3x3-torch.bmm(m3x3,m3x3.transpose(1,2))
     diff64x64 = id64x64-torch.bmm(m64x64,m64x64.transpose(1,2))
     return criterion(outputs, labels) + alpha * (torch.norm(diff3x3)+torch.norm(diff64x64)) / float(bs)
+
+def main():
+    # visualize the network
+    # from torchview import draw_graph
+    from torchinfo import summary
+
+    num_classes = 10
+    INPUT_POINT_CLOUD_SIZE = 1024
+
+    # Create the network
+    model = PointNet(classes=num_classes)
+
+    x = torch.randn((1, 3, INPUT_POINT_CLOUD_SIZE))    
+
+    summary(model=model, 
+            input_size=x.shape,
+            col_names=["input_size", "output_size", "num_params", "trainable"],
+            col_width=20,
+            row_settings=["var_names"])
+
+    # # Visualize the network
+    # model_graph = draw_graph(model, x, expand_nested=True, graph_name='ResNet50_graph')
+    # model_graph.resize_graph(scale=1.0)
+    # model_graph.visual_graph.render(format='png')
+
+if __name__ == "__main__":
+    main()

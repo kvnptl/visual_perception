@@ -120,7 +120,7 @@ dataset.ToTensor()(noisy_rot_pointcloud)
 
 # Transforms for training. 1024 points per cloud as in the paper!
 train_transforms = transforms.Compose([
-                    dataset.PointSampler(1024),
+                    dataset.PointSampler(config.INPUT_POINT_CLOUD_SIZE),
                     dataset.Normalize(),
                     dataset.RandRotation_z(),
                     dataset.RandomNoise(),
