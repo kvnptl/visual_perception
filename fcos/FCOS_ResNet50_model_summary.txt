@@ -1,0 +1,63 @@
+=======================================================================================================================================
+Layer (type (var_name))                                 Input Shape          Output Shape         Param #              Trainable
+=======================================================================================================================================
+FCOS (FCOS)                                             [1, 3, 224, 224]     [0, 4]               --                   Partial
+├─GeneralizedRCNNTransform (transform)                  [1, 3, 224, 224]     [1, 3, 800, 800]     --                   --
+├─BackboneWithFPN (backbone)                            [1, 3, 800, 800]     [1, 256, 7, 7]       --                   Partial
+│    └─IntermediateLayerGetter (body)                   [1, 3, 800, 800]     [1, 2048, 25, 25]    --                   Partial
+│    │    └─Conv2d (conv1)                              [1, 3, 800, 800]     [1, 64, 400, 400]    (9,408)              False
+│    │    └─FrozenBatchNorm2d (bn1)                     [1, 64, 400, 400]    [1, 64, 400, 400]    --                   --
+│    │    └─ReLU (relu)                                 [1, 64, 400, 400]    [1, 64, 400, 400]    --                   --
+│    │    └─MaxPool2d (maxpool)                         [1, 64, 400, 400]    [1, 64, 200, 200]    --                   --
+│    │    └─Sequential (layer1)                         [1, 64, 200, 200]    [1, 256, 200, 200]   (212,992)            False
+│    │    └─Sequential (layer2)                         [1, 256, 200, 200]   [1, 512, 100, 100]   1,212,416            True
+│    │    └─Sequential (layer3)                         [1, 512, 100, 100]   [1, 1024, 50, 50]    7,077,888            True
+│    │    └─Sequential (layer4)                         [1, 1024, 50, 50]    [1, 2048, 25, 25]    14,942,208           True
+│    └─FeaturePyramidNetwork (fpn)                      [1, 512, 100, 100]   [1, 256, 7, 7]       --                   True
+│    │    └─ModuleList (inner_blocks)                   --                   --                   (recursive)          True
+│    │    └─ModuleList (layer_blocks)                   --                   --                   (recursive)          True
+│    │    └─ModuleList (inner_blocks)                   --                   --                   (recursive)          True
+│    │    └─ModuleList (layer_blocks)                   --                   --                   (recursive)          True
+│    │    └─ModuleList (inner_blocks)                   --                   --                   (recursive)          True
+│    │    └─ModuleList (layer_blocks)                   --                   --                   (recursive)          True
+│    │    └─LastLevelP6P7 (extra_blocks)                [1, 256, 100, 100]   [1, 256, 100, 100]   1,180,160            True
+├─FCOSHead (head)                                       [1, 256, 100, 100]   [1, 13343, 1]        --                   True
+│    └─FCOSClassificationHead (classification_head)     [1, 256, 100, 100]   [1, 13343, 91]       --                   True
+│    │    └─Sequential (conv)                           [1, 256, 100, 100]   [1, 256, 100, 100]   2,362,368            True
+│    │    └─Conv2d (cls_logits)                         [1, 256, 100, 100]   [1, 91, 100, 100]    209,755              True
+│    │    └─Sequential (conv)                           [1, 256, 50, 50]     [1, 256, 50, 50]     (recursive)          True
+│    │    └─Conv2d (cls_logits)                         [1, 256, 50, 50]     [1, 91, 50, 50]      (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 25, 25]     [1, 256, 25, 25]     (recursive)          True
+│    │    └─Conv2d (cls_logits)                         [1, 256, 25, 25]     [1, 91, 25, 25]      (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 13, 13]     [1, 256, 13, 13]     (recursive)          True
+│    │    └─Conv2d (cls_logits)                         [1, 256, 13, 13]     [1, 91, 13, 13]      (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 7, 7]       [1, 256, 7, 7]       (recursive)          True
+│    │    └─Conv2d (cls_logits)                         [1, 256, 7, 7]       [1, 91, 7, 7]        (recursive)          True
+│    └─FCOSRegressionHead (regression_head)             [1, 256, 100, 100]   [1, 13343, 4]        --                   True
+│    │    └─Sequential (conv)                           [1, 256, 100, 100]   [1, 256, 100, 100]   2,362,368            True
+│    │    └─Conv2d (bbox_reg)                           [1, 256, 100, 100]   [1, 4, 100, 100]     9,220                True
+│    │    └─Conv2d (bbox_ctrness)                       [1, 256, 100, 100]   [1, 1, 100, 100]     2,305                True
+│    │    └─Sequential (conv)                           [1, 256, 50, 50]     [1, 256, 50, 50]     (recursive)          True
+│    │    └─Conv2d (bbox_reg)                           [1, 256, 50, 50]     [1, 4, 50, 50]       (recursive)          True
+│    │    └─Conv2d (bbox_ctrness)                       [1, 256, 50, 50]     [1, 1, 50, 50]       (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 25, 25]     [1, 256, 25, 25]     (recursive)          True
+│    │    └─Conv2d (bbox_reg)                           [1, 256, 25, 25]     [1, 4, 25, 25]       (recursive)          True
+│    │    └─Conv2d (bbox_ctrness)                       [1, 256, 25, 25]     [1, 1, 25, 25]       (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 13, 13]     [1, 256, 13, 13]     (recursive)          True
+│    │    └─Conv2d (bbox_reg)                           [1, 256, 13, 13]     [1, 4, 13, 13]       (recursive)          True
+│    │    └─Conv2d (bbox_ctrness)                       [1, 256, 13, 13]     [1, 1, 13, 13]       (recursive)          True
+│    │    └─Sequential (conv)                           [1, 256, 7, 7]       [1, 256, 7, 7]       (recursive)          True
+│    │    └─Conv2d (bbox_reg)                           [1, 256, 7, 7]       [1, 4, 7, 7]         (recursive)          True
+│    │    └─Conv2d (bbox_ctrness)                       [1, 256, 7, 7]       [1, 1, 7, 7]         (recursive)          True
+├─AnchorGenerator (anchor_generator)                    [1, 3, 800, 800]     [13343, 4]           --                   --
+=======================================================================================================================================
+Total params: 32,269,600
+Trainable params: 32,047,200
+Non-trainable params: 222,400
+Total mult-adds (Units.GIGABYTES): 128.24
+=======================================================================================================================================
+Input size (MB): 0.60
+Forward/backward pass size (MB): 1635.76
+Params size (MB): 129.08
+Estimated Total Size (MB): 1765.44
+=======================================================================================================================================

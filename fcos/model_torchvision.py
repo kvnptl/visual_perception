@@ -27,11 +27,11 @@ def main():
     # save onnx model
     # torch.onnx.export(model, x, "fcos_resnet18.onnx")
 
-    # summary(model=model, 
-    #         input_size=x.shape,
-    #         col_names=["input_size", "output_size", "num_params", "trainable"],
-    #         col_width=20,
-    #         row_settings=["var_names"])
+    summary(model=model, 
+            input_size=x.shape,
+            col_names=["input_size", "output_size", "num_params", "trainable"],
+            col_width=20,
+            row_settings=["var_names"])
 
     # # Visualize the network
     # model_graph = draw_graph(model, x, 
@@ -42,13 +42,13 @@ def main():
     # model_graph.visual_graph.render(format='png')
     
     # Torchlens
-    torchlens.log_forward_pass(model=model.eval(),
-                            input_args=x,
-                            vis_opt='rolled',
-                            vis_save_only=True,
-                            vis_outpath='fcos_graph_torchlens',
-                            vis_fileformat='png',
-                            vis_direction='topdown')
+    # torchlens.log_forward_pass(model=model.eval(),
+    #                         input_args=x,
+    #                         vis_opt='rolled',
+    #                         vis_save_only=True,
+    #                         vis_outpath='fcos_graph_torchlens',
+    #                         vis_fileformat='png',
+    #                         vis_direction='topdown')
 
 def simple_net_viz():
     import torchlens
