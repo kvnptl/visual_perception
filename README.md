@@ -16,8 +16,8 @@
   - [ ] RT-DETR
 
 ## 2D Segmentation
-- [] U-Net
-- [] DeepLab
+- [ ] U-Net
+- [ ] DeepLab
 
 ## 3D Object Detection
  
