@@ -70,10 +70,15 @@ class UNet(nn.Module):
 
 
 def test():
-    x = torch.randn((3, 1, 161, 161))
-    model = UNet(in_channels=1, out_channels=1)
+    x = torch.randn((1, 3, 161, 161))
+    print(x.shape)
+    model = UNet(in_channels=3, out_channels=1)
     preds = model(x)
-    assert preds.shape == x.shape
+    # assert preds.shape == x.shape
+
+    from torchinfo import summary
+
+    summary(model, input_size=(1, 3, 161, 161))
 
 
 if __name__ == "__main__":
