@@ -98,10 +98,8 @@ def main():
         NUM_WORKERS
     )
 
-    # if LOAD_MODEL:
-    #     load_checkpoint(torch.load(LOAD_MODEL_FILE), model)
-
-    # check_accuracy(val_loaders, model, device=DEVICE)
+    if LOAD_MODEL:
+        load_checkpoint(torch.load(LOAD_MODEL_FILE), model)
 
     scaler = torch.cuda.amp.GradScaler()
     for epoch in range(NUM_EPOCHS):
