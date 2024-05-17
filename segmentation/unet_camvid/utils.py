@@ -7,6 +7,15 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import dataloader
+import random
+import config
+
+
+def set_seed(seed=8):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
 
 
 def save_checkpoint(state, folder="checkpoints/", filename="mt_checkpoint.pth.tar"):
@@ -68,7 +77,7 @@ def pixel_accuracy(outputs, masks):
     correct = (preds == masks).float()
     # sum along the height and width
     acc = correct.sum() / correct.numel()
-    return acc
+    return acc.item()
 
 
 def dice_score_fn(outputs, masks, smooth=1e-8):
@@ -84,10 +93,10 @@ def dice_score_fn(outputs, masks, smooth=1e-8):
         dice += (2. * intersection + smooth) / (union + smooth)
 
     dice /= num_classes
-    return dice
+    return dice.item()
 
 
-def iou(outputs, masks, smooth=1e-8):
+def iou_score_fn(outputs, masks, smooth=1e-8):
     num_classes = outputs.shape[1]
     _, preds = torch.max(outputs, dim=1)
     iou = 0
@@ -166,10 +175,13 @@ def visualize(idx, image, pred, ground_truth, folder="saved_images/"):
     plt.savefig(file_name)
 
 
-def save_predictions_as_imgs(loader, model, folder="saved_images/", device="cuda"):
+def save_predictions_as_imgs(loader, model, device="cuda"):
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    target_dir = os.path.join(config.PARENT_DIR, "results",
+                              config.DATASET_NAME, "saved_images")
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
 
     model.eval()
     for idx, (x, y) in enumerate(loader):
@@ -181,13 +193,12 @@ def save_predictions_as_imgs(loader, model, folder="saved_images/", device="cuda
             preds_cpu = preds.cpu()
             y_cpu = y.cpu()
             visualize(idx, x_cpu[0].permute(1, 2, 0),
-                      preds_cpu[0], y_cpu[0], folder=folder)
+                      preds_cpu[0], y_cpu[0], folder=target_dir)
 
     model.train()
 
+
 # Map the idx to RGB
-
-
 def map_class_to_rgb(p):
 
     # Index to RGB
@@ -217,3 +228,86 @@ def mask_cls_to_rgb(mask):
     rgb_mask = np.apply_along_axis(map_class_to_rgb, -1, expanded_indices)
 
     return rgb_mask
+
+
+def save_model(model, target_dir, model_name):
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
+    # Create model save path
+    assert model_name.endswith(".pth") or model_name.endswith(
+        ".pt"), "model_name should end with '.pt' or '.pth'"
+
+    model_save_path = os.path.join(target_dir, model_name)
+
+    # Save the model state_dict()
+    print(f"[INFO] Saving model to: {model_save_path}")
+    torch.save(obj=model.state_dict(),
+               f=model_save_path)
+
+
+def plot_loss_curve(results, save_fig=False):
+    """
+    Plots the loss and accuracy curves of a results dictionary.
+    """
+
+    train_loss = results["train_loss"]
+    train_acc = results["train_acc"]
+    train_dice_score = results["train_dice_score"]
+    train_iou_score = results["train_iou_score"]
+
+    val_loss = results["val_loss"]
+    val_acc = results["val_acc"]
+    val_dice_score = results["val_dice_score"]
+    val_iou_score = results["val_iou_score"]
+
+    epochs = range(len(results["train_loss"]))
+
+    plt.figure(figsize=(15, 5))
+
+    # Plot loss
+    plt.subplot(1, 4, 1)
+    plt.plot(epochs, train_loss, label="train_loss")
+    plt.plot(epochs, val_loss, label="val_loss")
+    plt.title("Loss")
+    plt.xlabel("Epochs")
+    plt.legend()
+    plt.grid()
+
+    # Plot accuracy
+    plt.subplot(1, 4, 2)
+    plt.plot(epochs, train_acc, label="train_acc")
+    plt.plot(epochs, val_acc, label="val_acc")
+    plt.title("Accuracy")
+    plt.xlabel("Epochs")
+    plt.legend()
+    plt.grid()
+
+    # Plot dice score
+    plt.subplot(1, 4, 3)
+    plt.plot(epochs, train_dice_score, label="train_dice_score")
+    plt.plot(epochs, val_dice_score, label="val_dice_score")
+    plt.title("Dice Score")
+    plt.xlabel("Epochs")
+    plt.legend()
+    plt.grid()
+
+    # Plot iou score
+    plt.subplot(1, 4, 4)
+    plt.plot(epochs, train_iou_score, label="train_iou_score")
+    plt.plot(epochs, val_iou_score, label="val_iou_score")
+    plt.title("IoU Score")
+    plt.xlabel("Epochs")
+    plt.legend()
+    plt.grid()
+
+    if save_fig:
+        target_dir = os.path.join(
+            config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "plots")
+        save_plot(target_dir, "loss_and_acc_curves.png")
+
+
+def save_plot(target_dir: str, filename: str):
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    plt.savefig(os.path.join(target_dir, filename))
