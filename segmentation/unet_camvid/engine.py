@@ -12,7 +12,8 @@ def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
                loss_fn: torch.nn.Module,
                optimizer: torch.optim.Optimizer,
-               device: torch.device) -> Tuple[float, float]:
+               device: torch.device,
+               scaler) -> Tuple[float, float]:
     """
     Trains a PyTorch model for a single epoch.
     """
@@ -39,10 +40,13 @@ def train_step(model: torch.nn.Module,
         optimizer.zero_grad()
 
         # 4. Loss backward
-        loss.backward()
+        # loss.backward()
+        scaler.scale(loss).backward()
 
         # 5. Optimizer step
-        optimizer.step()
+        # optimizer.step()
+        scaler.step(optimizer)
+        scaler.update()
 
         # Calculate and accumulate accuracy metric across all batches
         train_acc += utils.pixel_accuracy(y_pred, y)
@@ -123,6 +127,7 @@ def train(model: torch.nn.Module,
           epochs: int,
           device: torch.device,
           writer,
+          scaler,
           save_model: bool) -> Dict[str, List[float]]:
 
     # Create empty result dict
@@ -140,13 +145,19 @@ def train(model: torch.nn.Module,
 
     tqdm_loop = tqdm(range(epochs), desc="Epoch")
 
+    if save_model:
+        model_save_path = os.path.join(
+            config.PARENT_DIR, "results", config.DATASET_NAME, timestamp, "model")
+        os.makedirs(model_save_path, exist_ok=True)
+
     # Loop through training steps
     for epoch in tqdm(tqdm_loop):
         train_loss, train_acc = train_step(model=model,
                                            dataloader=train_dataloader,
                                            loss_fn=loss_fn,
                                            optimizer=optimizer,
-                                           device=device)
+                                           device=device,
+                                           scaler=scaler)
         val_loss, val_acc = val_step(model=model,
                                      dataloader=test_dataloader,
                                      loss_fn=loss_fn,
@@ -197,9 +208,6 @@ def train(model: torch.nn.Module,
 
         # Save model if it's the best yet
         if save_model:
-            model_save_path = os.path.join(
-                config.PARENT_DIR, "results", config.DATASET_NAME, timestamp, "model")
-            os.makedirs(model_save_path, exist_ok=True)
             if val_acc["val_acc"] > test_acc_threshold:
                 try:
                     # remove previous best model
@@ -222,25 +230,3 @@ def train(model: torch.nn.Module,
         writer.close()
 
     return result
-
-
-# def train_fn(loader, model, optimizer, loss_fn, scaler):
-#     loss_loop = tqdm(loader)
-
-#     for batch_idx, (data, targets) in enumerate(loss_loop):
-#         data = data.to(DEVICE)
-#         targets = targets.to(DEVICE)
-
-#         # forward
-#         with torch.cuda.amp.autocast():
-#             predictions = model(data)
-#             loss = loss_fn(predictions, targets)
-
-#         # backward
-#         optimizer.zero_grad()
-#         scaler.scale(loss).backward()
-#         scaler.step(optimizer)
-#         scaler.update()
-
-#         # update tqdm loop
-#         loss_loop.set_postfix(loss=loss.item())

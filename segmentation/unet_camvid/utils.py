@@ -31,7 +31,7 @@ def load_checkpoint(checkpoint, model):
     model.load_state_dict(checkpoint["state_dict"])
 
 
-def get_loaders(
+def get_loaders_old(
     dataset_dir,
     batch_size,
     train_transform,
@@ -68,6 +68,36 @@ def get_loaders(
     )
 
     return train_loader, val_loader
+
+
+def get_loaders(
+    dataset_dir,
+    batch_size,
+    transform,
+    set_type="train",
+    num_workers=4,
+    pin_memory=True,
+):
+    input_dataset = CamVidDataset(
+        img_dir=dataset_dir + "/" + set_type,
+        mask_dir=dataset_dir + "/" + set_type + "_labels",
+        transform=transform
+    )
+
+    if set_type == "train":
+        shuffle_flag = True
+    else:
+        shuffle_flag = False
+
+    data_loader = DataLoader(
+        input_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        shuffle=shuffle_flag,
+    )
+
+    return data_loader
 
 
 def pixel_accuracy(outputs, masks):
@@ -178,7 +208,7 @@ def visualize(idx, image, pred, ground_truth, folder="saved_images/"):
 def save_predictions_as_imgs(loader, model, device="cuda"):
 
     target_dir = os.path.join(config.PARENT_DIR, "results",
-                              config.DATASET_NAME, "saved_images")
+                              config.DATASET_NAME, config.TIMESTAMP, "saved_images")
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)

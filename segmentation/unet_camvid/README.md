@@ -1,4 +1,5 @@
 # TODO
 
-- Model monitoring code
-  - Loss curves, Accuracy curves
+- [x] Model monitoring code
+  - [x] Loss curves, Accuracy curves
+- (if possible) Integrate focal loss to mitigate class imbalance

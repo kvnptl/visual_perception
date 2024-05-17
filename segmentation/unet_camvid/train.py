@@ -103,11 +103,20 @@ def main():
     loss_fn = nn.CrossEntropyLoss()  # for multi class, use cross entropy
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    train_dataloader, val_dataloader = utils.get_loaders(
+    train_dataloader = utils.get_loaders(
         dataset_dir=DATASET_DIR,
         batch_size=BATCH_SIZE,
-        train_transform=train_transforms,
-        val_transform=val_transforms,
+        transform=train_transforms,
+        set_type="train",
+        pin_memory=PIN_MEMORY,
+        num_workers=NUM_WORKERS
+    )
+
+    val_dataloader = utils.get_loaders(
+        dataset_dir=DATASET_DIR,
+        batch_size=BATCH_SIZE,
+        transform=val_transforms,
+        set_type="val",
         pin_memory=PIN_MEMORY,
         num_workers=NUM_WORKERS
     )
@@ -123,6 +132,8 @@ def main():
     # model_writer = create_write(experiment_name="unet_camvid",
     #                             model_name=f"model_epoch_{NUM_EPOCHS}",)
 
+    # For Automatic Mixed Precision (AMP) training
+    scaler = torch.cuda.amp.GradScaler()
     results = engine.train(model=model,
                            train_dataloader=train_dataloader,
                            test_dataloader=val_dataloader,
@@ -131,6 +142,7 @@ def main():
                            epochs=NUM_EPOCHS,
                            device=DEVICE,
                            writer=None,
+                           scaler=scaler,
                            save_model=True)
 
     end_time = timer()
@@ -145,9 +157,6 @@ def main():
 
     # Evaluation
     utils.plot_loss_curve(results=results, save_fig=True)
-
-    # TODO: for Automatic Mixed Precision (AMP) training
-    scaler = torch.cuda.amp.GradScaler()
 
     if config.LOAD_MODEL:
         print(f"[INFO] Loading model...")

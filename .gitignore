@@ -167,3 +167,4 @@ custom_object_detector/runs
 custom_object_detector/results
 datasets
 pointnet/dataset
+segmentation/unet_camvid/results
