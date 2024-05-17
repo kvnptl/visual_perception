@@ -168,3 +168,7 @@ custom_object_detector/results
 datasets
 pointnet/dataset
 segmentation/unet_camvid/results
+*.pth
+*.tar
+*.zip
+*.pt
