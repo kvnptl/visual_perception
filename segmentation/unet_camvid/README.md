@@ -1,6 +1,6 @@
 ## UNet based semantic segmentation on CamVid dataset
 
-[summary]
+The project is structured to facilitate training a U-Net model for segmenting driving scenes from CamVid dataset, providing both standalone Python scripts and a Jupyter notebook for interactive experimentation. This setup is ideal for those interested in applying deep learning to real-world vision tasks in autonomous driving and related fields.
 
 ## Dataset
 
