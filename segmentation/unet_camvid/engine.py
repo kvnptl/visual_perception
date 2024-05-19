@@ -13,7 +13,8 @@ def train_step(model: torch.nn.Module,
                loss_fn: torch.nn.Module,
                optimizer: torch.optim.Optimizer,
                device: torch.device,
-               scaler) -> Tuple[float, float]:
+               scaler,
+               tqdm_loop) -> Tuple[float, float]:
     """
     Trains a PyTorch model for a single epoch.
     """
@@ -22,10 +23,10 @@ def train_step(model: torch.nn.Module,
     train_loss, train_acc, train_dice_score, train_iou_score = 0, 0, 0, 0
     acc = {}
 
-    tqdm_loop = tqdm(dataloader, desc="Train")
+    # tqdm_loop = tqdm(dataloader, desc="Train")
 
     # Loop through data loader data batches
-    for batch, (X, y) in enumerate(tqdm_loop):
+    for batch, (X, y) in enumerate(dataloader):
         # Send data to target device
         X, y = X.to(device), y.to(device)
 
@@ -53,6 +54,7 @@ def train_step(model: torch.nn.Module,
         train_dice_score += utils.dice_score_fn(y_pred, y)
         train_iou_score += utils.iou_score_fn(y_pred, y)
 
+        tqdm_loop.update(1)
         # Update progress bar with training metrics
         tqdm_loop.set_postfix(
             loss=train_loss / (batch + 1),
@@ -143,7 +145,7 @@ def train(model: torch.nn.Module,
     test_acc_threshold = 0.4
     timestamp = config.TIMESTAMP
 
-    tqdm_loop = tqdm(range(epochs), desc="Epoch")
+    # tqdm_loop = tqdm(range(epochs), desc="Epoch")
 
     if save_model:
         model_save_path = os.path.join(
@@ -151,13 +153,16 @@ def train(model: torch.nn.Module,
         os.makedirs(model_save_path, exist_ok=True)
 
     # Loop through training steps
-    for epoch in tqdm(tqdm_loop):
+    for epoch in range(epochs):
+        tqdm_loop = tqdm(total=len(train_dataloader),
+                         desc=f"Epoch {epoch+1}/{epochs}", position=0, leave=True)
         train_loss, train_acc = train_step(model=model,
                                            dataloader=train_dataloader,
                                            loss_fn=loss_fn,
                                            optimizer=optimizer,
                                            device=device,
-                                           scaler=scaler)
+                                           scaler=scaler,
+                                           tqdm_loop=tqdm_loop)
         val_loss, val_acc = val_step(model=model,
                                      dataloader=test_dataloader,
                                      loss_fn=loss_fn,
