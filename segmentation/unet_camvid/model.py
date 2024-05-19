@@ -4,7 +4,7 @@ import torchvision.transforms.functional as TF
 
 
 class Block(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, dropout=0.5):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels=in_channels,
                                out_channels=out_channels,
@@ -22,15 +22,18 @@ class Block(nn.Module):
                                kernel_size=3,
                                stride=1,
                                padding=1)
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x):
         # TODO: replace with single line return
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
+        x = self.dropout(x)
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.relu(x)
+        x = self.dropout(x)
         return x
 
 
