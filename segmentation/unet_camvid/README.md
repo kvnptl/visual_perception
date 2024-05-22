@@ -60,6 +60,7 @@ The project is structured to facilitate training a U-Net [Ronneberger et al.][1]
 - [ ] Add learning rate scheduler
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
+- [ ] Add result table with metrics
 
 ## References
 
