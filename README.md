@@ -9,6 +9,7 @@
   - [ ] Faster RCNN
   - [ ] Custom naive detection net
   - [ ] SSD
+  - [ ] RetinaNet
 - Transformer
   - [ ] ViT (classification)
   - [ ] DETR
