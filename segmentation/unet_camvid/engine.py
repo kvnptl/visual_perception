@@ -123,7 +123,7 @@ def val_step(model: torch.nn.Module,
 
 def train(model: torch.nn.Module,
           train_dataloader: torch.utils.data.DataLoader,
-          test_dataloader: torch.utils.data.DataLoader,
+          val_dataloader: torch.utils.data.DataLoader,
           optimizer: torch.optim.Optimizer,
           loss_fn: torch.nn.Module,
           epochs: int,
@@ -164,7 +164,7 @@ def train(model: torch.nn.Module,
                                            scaler=scaler,
                                            tqdm_loop=tqdm_loop)
         val_loss, val_acc = val_step(model=model,
-                                     dataloader=test_dataloader,
+                                     dataloader=val_dataloader,
                                      loss_fn=loss_fn,
                                      device=device)
 
@@ -192,6 +192,9 @@ def train(model: torch.nn.Module,
         result["val_dice_score"].append(val_acc["val_dice_score"])
         result["val_iou_score"].append(val_acc["val_iou_score"])
 
+        # Evaluation
+        utils.plot_loss_curve(results=result, save_fig=True)
+
         # Write to TensorBoard
         if writer:
             writer.add_scalars(
@@ -213,6 +216,7 @@ def train(model: torch.nn.Module,
 
         # Save model if it's the best yet
         if save_model:
+            # TODO: check whether to use val_acc or val_loss
             if val_acc["val_acc"] > test_acc_threshold:
                 try:
                     # remove previous best model
@@ -228,6 +232,10 @@ def train(model: torch.nn.Module,
                 utils.save_model(model=model,
                                  target_dir=model_save_path,
                                  model_name=f"best_model_{epoch+1}.pth")
+
+                # Print some examples to a folder
+                utils.save_predictions_as_imgs(
+                    val_dataloader, model, num_imgs=5, set_type="val", device=device)
 
                 test_acc_threshold = val_acc["val_acc"]
 
