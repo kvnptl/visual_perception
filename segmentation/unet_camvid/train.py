@@ -16,10 +16,18 @@ from datetime import datetime
 import os
 from torchinfo import summary
 from timeit import default_timer as timer
+import argparse
+
+# Select device
+parser = argparse.ArgumentParser(description="Choose device index")
+parser.add_argument('deviceIndex', metavar='DeviceIndex',
+                    type=int, help='the device index to use (0 or 1)', default=0)
+args = parser.parse_args()
+
+DEVICE = f"cuda:{args.deviceIndex}" if torch.cuda.is_available() else "cpu"
 
 # Hyperparameters
 LEARNING_RATE = config.LEARNING_RATE
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = config.BATCH_SIZE
 NUM_EPOCHS = config.NUM_EPOCHS
 NUM_WORKERS = config.NUM_WORKERS
@@ -52,6 +60,9 @@ LOAD_MODEL_FILE = "/home/kpatel2s/work/kpatel2s_datasets/carvana_dataset/my_chec
 
 
 def main():
+
+    # Start time
+    start_time = timer()
 
     # Dataset prep
     # Get the class label csv file
@@ -87,6 +98,19 @@ def main():
         ]
     )
 
+    # Test
+    test_transforms = A.Compose(
+        [
+            A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+            A.Normalize(
+                mean=[0.0, 0.0, 0.0],
+                std=[1.0, 1.0, 1.0],
+                max_pixel_value=255.0,
+            ),
+            ToTensorV2(),
+        ]
+    )
+
     model = UNet(in_channels=3, out_channels=n_classes).to(DEVICE)
 
     # Get the summary of the model
@@ -97,7 +121,7 @@ def main():
                 input_size=x.shape,
                 col_names=["input_size", "output_size",
                            "num_params", "trainable"],
-                col_width=20,
+                depth=1,
                 row_settings=["var_names"])
 
     loss_fn = nn.CrossEntropyLoss()  # for multi class, use cross entropy
@@ -121,13 +145,20 @@ def main():
         num_workers=NUM_WORKERS
     )
 
+    test_dataloader = utils.get_loaders(
+        dataset_dir=DATASET_DIR,
+        batch_size=1,
+        transform=test_transforms,
+        set_type="test",
+        pin_memory=PIN_MEMORY,
+        num_workers=NUM_WORKERS
+    )
+
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load(LOAD_MODEL_FILE), model)
 
     # Set seed
     utils.set_seed(seed=config.SEED)
-
-    start_time = timer()
 
     # model_writer = create_write(experiment_name="unet_camvid",
     #                             model_name=f"model_epoch_{NUM_EPOCHS}",)
@@ -136,7 +167,7 @@ def main():
     scaler = torch.cuda.amp.GradScaler()
     results = engine.train(model=model,
                            train_dataloader=train_dataloader,
-                           test_dataloader=val_dataloader,
+                           val_dataloader=val_dataloader,
                            optimizer=optimizer,
                            loss_fn=loss_fn,
                            epochs=NUM_EPOCHS,
@@ -144,9 +175,6 @@ def main():
                            writer=None,
                            scaler=scaler,
                            save_model=True)
-
-    end_time = timer()
-    print(f"[INFO] Time elapsed: {end_time - start_time:.3f} seconds")
 
     # Save model
     model_save_path = os.path.join(
@@ -158,16 +186,25 @@ def main():
     # Evaluation
     utils.plot_loss_curve(results=results, save_fig=True)
 
+    # End time
+    end_time = timer()
+    elapsed_time = end_time - start_time
+    hours, rem = divmod(elapsed_time, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"{'****' * 10}")
+    print(
+        f"[INFO] Time elapsed: {int(hours):02}:{int(minutes):02}:{seconds:05.2f}")
+    print(f"{'****' * 10}")
+
     if config.LOAD_MODEL:
         print(f"[INFO] Loading model...")
         # load the model weights
         weights_file = config.MODEL_PATH
         model.load_state_dict(torch.load(weights_file))
 
-    # TODO: integrate properly
-    # print some examples to a folder
+    # Inference on test set and save the results
     utils.save_predictions_as_imgs(
-        val_dataloader, model, device=DEVICE)
+        test_dataloader, model, num_imgs=len(test_dataloader.dataset), set_type="test", device=DEVICE)
 
 
 if __name__ == "__main__":
