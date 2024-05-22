@@ -205,16 +205,18 @@ def visualize(idx, image, pred, ground_truth, folder="saved_images/"):
     plt.savefig(file_name)
 
 
-def save_predictions_as_imgs(loader, model, device="cuda"):
+def save_predictions_as_imgs(loader, model, num_imgs=5, set_type="test", device="cuda"):
 
     target_dir = os.path.join(config.PARENT_DIR, "results",
-                              config.DATASET_NAME, config.TIMESTAMP, "saved_images")
+                              config.DATASET_NAME, config.TIMESTAMP, f"{set_type}_saved_images")
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
     model.eval()
     for idx, (x, y) in enumerate(loader):
+        if idx >= num_imgs:
+            break
         x = x.to(device=device)
         with torch.no_grad():
             preds = model(x)
