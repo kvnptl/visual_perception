@@ -2,6 +2,26 @@
 
 The project is structured to facilitate training a U-Net model for segmenting driving scenes from CamVid dataset, providing both standalone Python scripts and a Jupyter notebook for interactive experimentation. This setup is ideal for those interested in applying deep learning to real-world vision tasks in autonomous driving and related fields.
 
+- Visualize the UNet model architecture graph here: [Network Graph (SVG)](unet_model_graph.gv.svg)
+
+## Results
+
+<p float="left">
+  <img src="results/CamVid/2024-05-19_01-21/saved_images/_image_0.png"/>
+  <br>
+  <img src="results/CamVid/2024-05-19_01-21/saved_images/_image_1.png"/>
+  <br>
+  <img src="results/CamVid/2024-05-19_01-21/saved_images/_image_2.png"/>
+  <br>
+  <img src="results/CamVid/2024-05-19_01-21/saved_images/_image_3.png"/>
+</p>
+
+## Loss and accuracy curves
+
+<p float="left">
+  <img src="results/CamVid/2024-05-19_01-21/plots/loss_and_acc_curves.png"/>
+</p>
+
 ## Dataset
 
 - CamVid (Cambridge-Driving Labeled Video Database): <https://www.kaggle.com/datasets/carlolepelaars/camvid>
@@ -24,7 +44,7 @@ The project is structured to facilitate training a U-Net model for segmenting dr
 - Run train script:
 
   ```bash
-  python train.py
+  python train.py <GPUDeviceIndex>
   ```
 
   - Check results in `results` folder, it should have model checkpoints, loss and accuracy curves, and sample val predictions
@@ -33,9 +53,10 @@ The project is structured to facilitate training a U-Net model for segmenting dr
 
 - [x] Model monitoring code
   - [x] Loss curves, Accuracy curves
+- [x] Train with bigger image size, e.g. 512x512
+- [x] Add regularization to prevent overfitting, i.e. dropout
 - [ ] (if possible) Integrate focal loss to mitigate class imbalance
-- [ ] Add regularization to prevent overfitting, i.e. dropout
+- [ ] Add IoU loss for semantic segmentation
 - [ ] Add learning rate scheduler
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
-- [ ] Add IoU loss for semantic segmentation
