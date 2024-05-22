@@ -1,6 +1,6 @@
 ## UNet based semantic segmentation on CamVid dataset
 
-The project is structured to facilitate training a U-Net model for segmenting driving scenes from CamVid dataset, providing both standalone Python scripts and a Jupyter notebook for interactive experimentation. This setup is ideal for those interested in applying deep learning to real-world vision tasks in autonomous driving and related fields.
+The project is structured to facilitate training a U-Net [Ronneberger et al.][1] model for segmenting driving scenes from CamVid dataset [Brostow et al.][2], providing both standalone Python scripts and a Jupyter notebook for interactive experimentation. This setup is ideal for those interested in applying deep learning to real-world vision tasks in autonomous driving and related fields.
 
 - Visualize the UNet model architecture graph here: [Network Graph (SVG)](media/unet_model_graph.gv.svg)
 
@@ -60,3 +60,9 @@ The project is structured to facilitate training a U-Net model for segmenting dr
 - [ ] Add learning rate scheduler
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
+
+## References
+
+[1]: Ronneberger, Olaf, Philipp Fischer, and Thomas Brox. "U-net: Convolutional networks for biomedical image segmentation." Medical image computing and computer-assisted intervention–MICCAI 2015: 18th international conference, Munich, Germany, October 5-9, 2015, proceedings, part III 18. Springer International Publishing, 2015.
+
+[2]: Brostow, Gabriel J., Julien Fauqueur, and Roberto Cipolla. "Semantic object classes in video: A high-definition ground truth database." Pattern recognition letters 30.2 (2009): 88-97.
