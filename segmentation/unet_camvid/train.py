@@ -127,6 +127,9 @@ def main():
     loss_fn = nn.CrossEntropyLoss()  # for multi class, use cross entropy
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
+    scheduler = optim.lr_scheduler.StepLR(
+        optimizer, step_size=NUM_EPOCHS/4, gamma=0.1)
+
     train_dataloader = utils.get_loaders(
         dataset_dir=DATASET_DIR,
         batch_size=BATCH_SIZE,
@@ -174,6 +177,7 @@ def main():
                            device=DEVICE,
                            writer=None,
                            scaler=scaler,
+                           scheduler=scheduler,
                            save_model=True)
 
     # Save model

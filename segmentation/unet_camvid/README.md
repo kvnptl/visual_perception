@@ -34,10 +34,12 @@ The project is structured to facilitate training a U-Net [Ronneberger et al.][1]
 ## Functionalities
 
 - Store best model based on val loss
+- Automatic Mixed Precision (AMP) training
 - Plot loss and accuracy curves
 - Config file to store hyperparameters
 - Produce detailed model summary
 - Modularize code
+- Store test predictions and intermediate val predictions
 
 ## How to train U-Net on CamVid dataset
 
@@ -55,9 +57,9 @@ The project is structured to facilitate training a U-Net [Ronneberger et al.][1]
   - [x] Loss curves, Accuracy curves
 - [x] Train with bigger image size, e.g. 512x512
 - [x] Add regularization to prevent overfitting, i.e. dropout
+- [x] Add learning rate scheduler
 - [ ] (if possible) Integrate focal loss to mitigate class imbalance
 - [ ] Add IoU loss for semantic segmentation
-- [ ] Add learning rate scheduler
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
 - [ ] Add result table with metrics

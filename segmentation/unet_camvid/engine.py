@@ -130,6 +130,7 @@ def train(model: torch.nn.Module,
           device: torch.device,
           writer,
           scaler,
+          scheduler,
           save_model: bool) -> Dict[str, List[float]]:
 
     # Create empty result dict
@@ -167,6 +168,8 @@ def train(model: torch.nn.Module,
                                      dataloader=val_dataloader,
                                      loss_fn=loss_fn,
                                      device=device)
+
+        scheduler.step()
 
         # Print out what's happening
         # print(
