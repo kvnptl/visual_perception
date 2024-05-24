@@ -62,7 +62,9 @@ The project is structured to facilitate training a U-Net [Ronneberger et al.][1]
 - [ ] Add IoU loss for semantic segmentation
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
-- [ ] Add result table with metrics
+- [ ] Add result table with metrics (testset)
+- [ ] Plot learning rate schedule
+- [ ] (MAJOR) Integrate uncertainty estimation
 
 ## References
 
