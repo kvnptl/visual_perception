@@ -145,8 +145,7 @@ def train(model: torch.nn.Module,
 
     test_acc_threshold = 0.4
     timestamp = config.TIMESTAMP
-
-    # tqdm_loop = tqdm(range(epochs), desc="Epoch")
+    lr_list = []
 
     if save_model:
         model_save_path = os.path.join(
@@ -169,21 +168,8 @@ def train(model: torch.nn.Module,
                                      loss_fn=loss_fn,
                                      device=device)
 
+        lr_list.append(optimizer.param_groups[0]["lr"])
         scheduler.step()
-
-        # Print out what's happening
-        # print(
-        #     f"\n\nEpoch: {epoch+1} | "
-        #     f"train_loss: {train_loss:.4f} | "
-        #     f"train_acc: {train_acc} | "
-        #     # f"train_dice_score: {train_acc['train_dice_score']:.4f} | "
-        #     # f"train_iou_score: {train_acc['train_iou_score']:.4f} | "
-        #     f"val_loss: {val_loss:.4f} | "
-        #     f"val_acc: {val_acc} | "
-        #     # f"val_dice_score: {val_acc['val_dice_score']:.4f} | "
-        #     # f"val_iou_score: {val_acc['val_iou_score']:.4f}"
-        #     f"\n\n"
-        # )
 
         # Update results dictionary
         result["train_loss"].append(train_loss)
@@ -197,6 +183,9 @@ def train(model: torch.nn.Module,
 
         # Evaluation
         utils.plot_loss_curve(results=result, save_fig=True)
+
+        # Plot learning rate
+        utils.plot_lr_curve(lr_list, save_fig=True)
 
         # Write to TensorBoard
         if writer:

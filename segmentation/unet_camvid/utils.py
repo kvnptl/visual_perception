@@ -339,6 +339,25 @@ def plot_loss_curve(results, save_fig=False):
         save_plot(target_dir, "loss_and_acc_curves.png")
 
 
+def plot_lr_curve(lr_list, save_fig=False):
+    """
+    Plots the loss and accuracy curves of a results dictionary.
+    """
+
+    plt.figure(figsize=(15, 5))
+
+    plt.plot(lr_list)
+    plt.title("Learning Rate")
+    plt.xlabel("Epochs")
+    plt.ylabel("Learning Rate")
+    plt.grid()
+
+    if save_fig:
+        target_dir = os.path.join(
+            config.PARENT_DIR, "results", config.DATASET_NAME, config.TIMESTAMP, "plots")
+        save_plot(target_dir, "lr_curve.png")
+
+
 def save_plot(target_dir: str, filename: str):
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
