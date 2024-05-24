@@ -1,7 +1,7 @@
 # Visual Perception
 
 ## 2D Object Detection
- 
+
 - CNN
   - [ ] YOLOv1
   - [ ] YOLOv3
@@ -17,11 +17,18 @@
   - [ ] RT-DETR
 
 ## 2D Segmentation
+
 - [x] U-Net
 - [ ] DeepLab
 
 ## 3D Object Detection
- 
+
 - CNN
 - Transformer
   
+## Object Tracking
+
+- [ ] Simple Online and Real-time Tracking (SORT)
+- [ ] DeepSORT
+- [ ] ByteTrack
+- [ ] BoT-SORT
