@@ -1,12 +1,25 @@
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 
-def focal_loss(pred, target, alpha=1, gamma=2):
-    ce_loss = F.cross_entropy(pred, target, reduction='none')
-    pt = torch.exp(-ce_loss)
-    focal_loss = alpha * (1 - pt) ** gamma * ce_loss
-    return focal_loss.mean()
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=1, gamma=2, ignore_index=None, reduction='mean'):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        CE_loss = F.cross_entropy(
+            inputs, targets, reduction='none')
+        pt = torch.exp(-CE_loss)
+        F_loss = self.alpha * (1-pt)**self.gamma * CE_loss
+
+        if self.reduction == 'sum':
+            return F_loss.sum()
+        elif self.reduction == 'mean':
+            return F_loss.mean()
 
 
 def dice_loss(pred, target, smooth=1e-6):
