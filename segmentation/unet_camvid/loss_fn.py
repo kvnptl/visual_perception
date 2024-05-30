@@ -20,15 +20,39 @@ class FocalLoss(nn.Module):
             return F_loss.sum()
         elif self.reduction == 'mean':
             return F_loss.mean()
+    
+class DiceLoss(nn.Module):
+    def __init__(self, smooth=1e-6, ignore_index=None):
+        super().__init__()
+        self.smooth = smooth
+        self.ignore_index = ignore_index
 
+    def forward(self, pred, target):
+        # Apply softmax to the predictions
+        pred = F.softmax(pred, dim=1)
+        
+        # Convert target to one-hot encoding
+        target = F.one_hot(target, num_classes=pred.shape[1]).permute(0, 3, 1, 2).float()
+        
+        # Handle ignore index
+        if self.ignore_index is not None:
+            mask = target != self.ignore_index
+            pred = pred * mask
+            target = target * mask
+            
+            # Zero out the predictions and targets where mask is False
+            pred = pred * mask.float()
+            target = target * mask.float()
 
-def dice_loss(pred, target, smooth=1e-6):
-    pred = torch.sigmoid(pred)
-    intersection = (pred * target).sum(dim=(2, 3))
-    union = pred.sum(dim=(2, 3)) + target.sum(dim=(2, 3))
-    dice = 2.0 * intersection / (union + smooth)
-    return 1.0 - dice.mean()
+        # Calculate intersection and union
+        intersection = (pred * target).sum(dim=(2, 3))
+        union = pred.sum(dim=(2, 3)) + target.sum(dim=(2, 3))
 
+        # Compute Dice coefficient
+        dice = 2.0 * intersection / (union + self.smooth)
+        
+        # Return Dice loss
+        return 1.0 - dice.mean()
 
 def tversky_loss(pred, target, alpha=0.5, beta=0.5, smooth=1e-6):
     pred = torch.sigmoid(pred)
