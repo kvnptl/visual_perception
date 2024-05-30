@@ -169,7 +169,8 @@ def train(model: torch.nn.Module,
                                      device=device)
 
         lr_list.append(optimizer.param_groups[0]["lr"])
-        scheduler.step()
+        if scheduler is not None:
+            scheduler.step()
 
         # Update results dictionary
         result["train_loss"].append(train_loss)

@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 from model import UNet
+from loss_fn import FocalLoss, DiceLoss
 import utils
 import config
 import engine
@@ -20,7 +21,12 @@ import argparse
 
 # Select device
 parser = argparse.ArgumentParser(description="Choose device index")
-parser.add_argument('deviceIndex', metavar='DeviceIndex',
+"""
+NOTE:
+# In argparse, arguments that start with a hyphen (-) or double hyphen (--) are optional and can be specified in any order. These are often used for flags or to specify parameters with default values.
+# Arguments without a hyphen are positional arguments. They are required and must be provided in the same order they were added.
+"""
+parser.add_argument('-deviceIndex', metavar='DeviceIndex',
                     type=int, help='the device index to use (0 or 1)', default=0)
 args = parser.parse_args()
 
@@ -111,6 +117,9 @@ def main():
         ]
     )
 
+    # Set seed
+    utils.set_seed(seed=config.SEED)
+
     model = UNet(in_channels=3, out_channels=n_classes).to(DEVICE)
 
     # Get the summary of the model
@@ -124,11 +133,13 @@ def main():
                 depth=1,
                 row_settings=["var_names"])
 
-    loss_fn = nn.CrossEntropyLoss()  # for multi class, use cross entropy
+    # loss_fn = nn.CrossEntropyLoss()  # for multi class
+    loss_fn = DiceLoss()
+
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    scheduler = optim.lr_scheduler.StepLR(
-        optimizer, step_size=NUM_EPOCHS/4, gamma=0.1)
+    # scheduler = optim.lr_scheduler.StepLR(
+    #     optimizer, step_size=NUM_EPOCHS/4, gamma=0.1)
 
     train_dataloader = utils.get_loaders(
         dataset_dir=DATASET_DIR,
@@ -160,9 +171,6 @@ def main():
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load(LOAD_MODEL_FILE), model)
 
-    # Set seed
-    utils.set_seed(seed=config.SEED)
-
     # model_writer = create_write(experiment_name="unet_camvid",
     #                             model_name=f"model_epoch_{NUM_EPOCHS}",)
 
@@ -177,7 +185,7 @@ def main():
                            device=DEVICE,
                            writer=None,
                            scaler=scaler,
-                           scheduler=scheduler,
+                           scheduler=scheduler if 'scheduler' in globals() else None, # Check if scheduler exists as a variable
                            save_model=True)
 
     # Save model
