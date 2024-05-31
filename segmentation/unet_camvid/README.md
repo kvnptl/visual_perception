@@ -58,12 +58,15 @@ The project is structured to facilitate training a U-Net [Ronneberger et al.][1]
 - [x] Train with bigger image size, e.g. 512x512
 - [x] Add regularization to prevent overfitting, i.e. dropout
 - [x] Add learning rate scheduler
-- [ ] (if possible) Integrate focal loss to mitigate class imbalance
-- [ ] Add IoU loss for semantic segmentation
+- [x] (if possible) Integrate focal loss to mitigate class imbalance
+- [x] Integrate Dice loss
+- [x] Integrate Tversky loss
+- [x] Add IoU loss for semantic segmentation
+- [x] Plot learning rate schedule
 - [ ] Add early stopping
 - [ ] Fix Tensorboard logging
 - [ ] Add result table with metrics (testset)
-- [ ] Plot learning rate schedule
+- [ ] (MAJOR) Integrate explainable AI techniques
 - [ ] (MAJOR) Integrate uncertainty estimation
 
 ## References
