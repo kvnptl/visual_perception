@@ -1,8 +1,4 @@
 import torch
-import torchvision
-from dataloader import CamVidDataset
-from torch.utils.data import DataLoader, random_split
-from torchvision.datasets import ImageFolder
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,75 +25,6 @@ def save_checkpoint(state, folder="checkpoints/", filename="mt_checkpoint.pth.ta
 def load_checkpoint(checkpoint, model):
     print("=> Loading checkpoint")
     model.load_state_dict(checkpoint["state_dict"])
-
-
-def get_loaders_old(
-    dataset_dir,
-    batch_size,
-    train_transform,
-    val_transform,
-    num_workers=4,
-    pin_memory=True,
-):
-    train_dataset = CamVidDataset(
-        img_dir=dataset_dir + "/train",
-        mask_dir=dataset_dir + "/train_labels",
-        transform=train_transform
-    )
-
-    val_dataset = CamVidDataset(
-        img_dir=dataset_dir + "/val",
-        mask_dir=dataset_dir + "/val_labels",
-        transform=val_transform
-    )
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-        shuffle=True,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-        shuffle=False,
-    )
-
-    return train_loader, val_loader
-
-
-def get_loaders(
-    dataset_dir,
-    batch_size,
-    transform,
-    set_type="train",
-    num_workers=4,
-    pin_memory=True,
-):
-    input_dataset = CamVidDataset(
-        img_dir=dataset_dir + "/" + set_type,
-        mask_dir=dataset_dir + "/" + set_type + "_labels",
-        transform=transform
-    )
-
-    if set_type == "train":
-        shuffle_flag = True
-    else:
-        shuffle_flag = False
-
-    data_loader = DataLoader(
-        input_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-        shuffle=shuffle_flag,
-    )
-
-    return data_loader
 
 
 def pixel_accuracy(outputs, masks):

@@ -1,12 +1,13 @@
 from datetime import datetime
+import os
 
 DATASET_DIR = "/home/kpatel2s/work/kpatel2s_datasets/CamVid"
-PARENT_DIR = "/home/kpatel2s/work/visual_perception/segmentation/unet_camvid"
+PARENT_DIR = os.path.dirname(__file__)
 DATASET_NAME = "CamVid"
 IMAGE_HEIGHT = 512
 IMAGE_WIDTH = 512
 
-LEARNING_RATE = 1e-2  # = 0.01
+LEARNING_RATE = 1e-4  # = 0.01
 BATCH_SIZE = 8
 NUM_EPOCHS = 100
 NUM_WORKERS = 8

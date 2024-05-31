@@ -5,6 +5,7 @@ import torchmetrics
 import model
 import config
 import utils
+import dataloader
 import pandas as pd
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -19,7 +20,7 @@ IMAGE_HEIGHT = config.IMAGE_HEIGHT
 IMAGE_WIDTH = config.IMAGE_WIDTH
 PIN_MEMORY = config.PIN_MEMORY
 DATASET_DIR = config.DATASET_DIR
-LOAD_MODEL_FILE = "/home/kpatel2s/work/visual_perception/segmentation/unet_camvid/results/CamVid/2024-05-24_00-51/model/best_model_96.pth"
+LOAD_MODEL_FILE = "/home/kpatel2s/work/visual_perception/segmentation/unet_camvid/results/CamVid/2024-05-30_21-24/model/best_model_100.pth"
 SAVE_PREDICTIONS = False
 
 # Dataset prep
@@ -52,7 +53,7 @@ test_transforms = A.Compose(
     ]
 )
 
-test_dataloader = utils.get_loaders(
+test_dataloader = dataloader.get_loaders(
     dataset_dir=DATASET_DIR,
     batch_size=BATCH_SIZE,
     transform=test_transforms,

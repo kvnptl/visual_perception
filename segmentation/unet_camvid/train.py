@@ -5,8 +5,9 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 from model import UNet
-from loss_fn import FocalLoss, DiceLoss
+from loss_fn import FocalLoss, DiceLoss, TverskyLoss, IoULoss
 import utils
+import dataloader
 import config
 import engine
 import cv2
@@ -134,14 +135,15 @@ def main():
                 row_settings=["var_names"])
 
     # loss_fn = nn.CrossEntropyLoss()  # for multi class
-    loss_fn = DiceLoss()
+    # loss_fn = DiceLoss()
+    loss_fn = IoULoss()
 
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # scheduler = optim.lr_scheduler.StepLR(
     #     optimizer, step_size=NUM_EPOCHS/4, gamma=0.1)
 
-    train_dataloader = utils.get_loaders(
+    train_dataloader = dataloader.get_loaders(
         dataset_dir=DATASET_DIR,
         batch_size=BATCH_SIZE,
         transform=train_transforms,
@@ -150,7 +152,7 @@ def main():
         num_workers=NUM_WORKERS
     )
 
-    val_dataloader = utils.get_loaders(
+    val_dataloader = dataloader.get_loaders(
         dataset_dir=DATASET_DIR,
         batch_size=BATCH_SIZE,
         transform=val_transforms,
@@ -159,7 +161,7 @@ def main():
         num_workers=NUM_WORKERS
     )
 
-    test_dataloader = utils.get_loaders(
+    test_dataloader = dataloader.get_loaders(
         dataset_dir=DATASET_DIR,
         batch_size=1,
         transform=test_transforms,

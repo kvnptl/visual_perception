@@ -1,6 +1,6 @@
 import os
 from PIL import Image
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import torch
 import config
@@ -16,6 +16,34 @@ n_classes = len(classes)
 # Create a dictionary mapping for the classes with their colors
 cls2rgb = {cl: list(classes.loc[cl, :]) for cl in classes.index}
 
+def get_loaders(
+    dataset_dir,
+    batch_size,
+    transform,
+    set_type="train",
+    num_workers=4,
+    pin_memory=True,
+):
+    input_dataset = CamVidDataset(
+        img_dir=dataset_dir + "/" + set_type,
+        mask_dir=dataset_dir + "/" + set_type + "_labels",
+        transform=transform
+    )
+
+    if set_type == "train":
+        shuffle_flag = True
+    else:
+        shuffle_flag = False
+
+    data_loader = DataLoader(
+        input_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        shuffle=shuffle_flag,
+    )
+
+    return data_loader
 
 def adjust_mask(mask, flat=False):
     semantic_map = []
