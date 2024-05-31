@@ -11,7 +11,7 @@
   - [ ] SSD
   - [ ] RetinaNet
 - Transformer
-  - [ ] ViT (classification)
+  - [x] ViT (classification)
   - [ ] DETR
   - [ ] Deformable DETR
   - [ ] RT-DETR
