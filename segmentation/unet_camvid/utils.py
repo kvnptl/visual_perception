@@ -106,14 +106,15 @@ def profile(func):
         return result
     return wrapper
 
-def visualize(idx, image, pred, ground_truth, map_class_to_rgb=None, folder="saved_images/"):
+def visualize(idx, image, pred, ground_truth=None, map_class_to_rgb=None, folder="saved_images/"):
     # Create a folder
     if not os.path.exists(folder):
         os.makedirs(folder)
 
     # Convert mask_cls to RGB
     pred_rgb = mask_cls_to_rgb(pred, map_class_to_rgb)
-    ground_truth_rgb = mask_cls_to_rgb(ground_truth, map_class_to_rgb)
+    if ground_truth is not None:
+        ground_truth_rgb = mask_cls_to_rgb(ground_truth, map_class_to_rgb)
 
     # Create a figure
     plt.figure(figsize=(15, 5))
@@ -130,15 +131,19 @@ def visualize(idx, image, pred, ground_truth, map_class_to_rgb=None, folder="sav
     plt.axis("off")
     plt.title("Predicted Mask")
 
-    # Display the ground truth mask
-    plt.subplot(1, 3, 3)
-    plt.imshow(ground_truth_rgb)
-    plt.axis("off")
-    plt.title("Ground Truth Mask")
+    if ground_truth is not None:
+        # Display the ground truth mask
+        plt.subplot(1, 3, 3)
+        plt.imshow(ground_truth_rgb)
+        plt.axis("off")
+        plt.title("Ground Truth Mask")
 
     # Save the figure
     file_name = os.path.join(folder, f"image_{idx}.png")
     plt.savefig(file_name)
+
+    # Close the figure
+    plt.close()
 
 
 def save_predictions_as_imgs(loader, model, num_imgs=5, set_type="test", map_class_to_rgb=None, device="cuda"):

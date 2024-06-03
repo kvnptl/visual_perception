@@ -14,15 +14,15 @@ import os
 from line_profiler import LineProfiler
 
 # Hyperparameters
-DEVICE = "cuda:1" if torch.cuda.is_available() else "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 1
 NUM_WORKERS = config.NUM_WORKERS
 IMAGE_HEIGHT = config.IMAGE_HEIGHT
 IMAGE_WIDTH = config.IMAGE_WIDTH
 PIN_MEMORY = config.PIN_MEMORY
 DATASET_DIR = config.DATASET_DIR
-LOAD_MODEL_FILE = "/home/kpatel2s/work/visual_perception/segmentation/unet_camvid/results/CamVid/2024-05-31_04-10/model/best_model_100.pth"
-SAVE_PREDICTIONS = True
+LOAD_MODEL_FILE = "/home/kpatel2s/work/visual_perception/segmentation/unet_camvid/results/CamVid/2024-06-03_16-43/model/best_model_100.pth"
+SAVE_PREDICTIONS = False
 
 # Dataset prep
 # Get the class label csv file
@@ -72,7 +72,7 @@ def main():
         dataset_dir=DATASET_DIR,
         batch_size=BATCH_SIZE,
         transform=test_transforms,
-        set_type="train",
+        set_type="test",
         pin_memory=PIN_MEMORY,
         num_workers=NUM_WORKERS
     )
@@ -80,7 +80,7 @@ def main():
     # Output dir
     # Get the folder name from LOAD_MODEL_FILE
     target_dir = "/".join(LOAD_MODEL_FILE.split("/")[:-2])
-    target_dir = os.path.join(target_dir, "train_set_results")
+    target_dir = os.path.join(target_dir, "test_set_results")
 
     # Test the unet_model
     test_loss, test_acc, test_dice_score, test_iou_score = 0.0, 0.0, 0.0, 0.0
@@ -101,7 +101,7 @@ def main():
                 y_cpu = target.cpu()
                 if SAVE_PREDICTIONS:
                     utils.visualize(idx, x_cpu[0].permute(1, 2, 0),
-                                    preds_cpu[0], y_cpu[0], map_class_to_rgb, folder=target_dir)
+                                    preds_cpu[0], y_cpu[0], map_class_to_rgb=map_class_to_rgb, folder=target_dir)
 
             test_acc += utils.pixel_accuracy(outputs, target)
             test_dice_score += utils.dice_score_fn(outputs, target)
