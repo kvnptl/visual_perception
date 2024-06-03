@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 from model import UNet
-from loss_fn import FocalLoss, DiceLoss, TverskyLoss, IoULoss
+from loss_fn import FocalLoss, DiceLoss, TverskyLoss, IoULoss, DiceFocalLoss, DiceCrossEntropyLoss, IoUCrossEntropyLoss, IoUFocalLoss, TverskyCrossEntropyLoss
 import utils
 import dataloader
 import config
@@ -74,6 +74,8 @@ def main():
     # Dataset prep
     # Get the class label csv file
     classes = pd.read_csv(DATASET_DIR + '/class_dict.csv', index_col=0)
+    cls2rgb = {cl:list(classes.loc[cl, :]) for cl in classes.index}
+    map_class_to_rgb = {i: rgb for i, rgb in enumerate(cls2rgb.values())} # a new dictionary with integer keys
 
     # There are total 32 classes
     n_classes = len(classes)
@@ -134,8 +136,6 @@ def main():
                 depth=1,
                 row_settings=["var_names"])
 
-    # loss_fn = nn.CrossEntropyLoss()  # for multi class
-    # loss_fn = DiceLoss()
     loss_fn = IoULoss()
 
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -188,6 +188,7 @@ def main():
                            writer=None,
                            scaler=scaler,
                            scheduler=scheduler if 'scheduler' in globals() else None, # Check if scheduler exists as a variable
+                           map_class_to_rgb=map_class_to_rgb,
                            save_model=True)
 
     # Save model
@@ -218,7 +219,7 @@ def main():
 
     # Inference on test set and save the results
     utils.save_predictions_as_imgs(
-        test_dataloader, model, num_imgs=len(test_dataloader.dataset), set_type="test", device=DEVICE)
+        test_dataloader, model, num_imgs=len(test_dataloader.dataset), set_type="test", map_class_to_rgb=map_class_to_rgb, device=DEVICE)
 
 
 if __name__ == "__main__":

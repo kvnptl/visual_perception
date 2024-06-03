@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import dataloader
 import random
 import config
+from line_profiler import LineProfiler
 
 
 def set_seed(seed=8):
@@ -96,15 +97,23 @@ def check_accuracy(loader, model, device="cuda"):
 
     model.train()
 
+def profile(func):
+    def wrapper(*args, **kwargs):
+        lp = LineProfiler()
+        lp.add_function(func)  # Add the function you want to profile
+        result = lp(func)(*args, **kwargs)
+        lp.print_stats(output_unit=1e-3)
+        return result
+    return wrapper
 
-def visualize(idx, image, pred, ground_truth, folder="saved_images/"):
+def visualize(idx, image, pred, ground_truth, map_class_to_rgb=None, folder="saved_images/"):
     # Create a folder
     if not os.path.exists(folder):
         os.makedirs(folder)
 
     # Convert mask_cls to RGB
-    pred_rgb = mask_cls_to_rgb(pred)
-    ground_truth_rgb = mask_cls_to_rgb(ground_truth)
+    pred_rgb = mask_cls_to_rgb(pred, map_class_to_rgb)
+    ground_truth_rgb = mask_cls_to_rgb(ground_truth, map_class_to_rgb)
 
     # Create a figure
     plt.figure(figsize=(15, 5))
@@ -128,11 +137,11 @@ def visualize(idx, image, pred, ground_truth, folder="saved_images/"):
     plt.title("Ground Truth Mask")
 
     # Save the figure
-    file_name = os.path.join(folder, f"_image_{idx}.png")
+    file_name = os.path.join(folder, f"image_{idx}.png")
     plt.savefig(file_name)
 
 
-def save_predictions_as_imgs(loader, model, num_imgs=5, set_type="test", device="cuda"):
+def save_predictions_as_imgs(loader, model, num_imgs=5, set_type="test", map_class_to_rgb=None, device="cuda"):
 
     target_dir = os.path.join(config.PARENT_DIR, "results",
                               config.DATASET_NAME, config.TIMESTAMP, f"{set_type}_saved_images")
@@ -152,7 +161,7 @@ def save_predictions_as_imgs(loader, model, num_imgs=5, set_type="test", device=
             preds_cpu = preds.cpu()
             y_cpu = y.cpu()
             visualize(idx, x_cpu[0].permute(1, 2, 0),
-                      preds_cpu[0], y_cpu[0], folder=target_dir)
+                      preds_cpu[0], y_cpu[0], map_class_to_rgb=map_class_to_rgb, folder=target_dir)
 
     model.train()
 
@@ -179,12 +188,19 @@ def convert_mask_to_rgb(new_mask):
     return rgb_mask
 
 
-def mask_cls_to_rgb(mask):
-    # Expand the dimensions of the array
-    expanded_indices = np.expand_dims(mask, axis=-1)
+def mask_cls_to_rgb(mask, map_class_to_rgb=None):
 
-    # Apply the function `map_class_to_rgb` to each 1-D slice along the last axis
-    rgb_mask = np.apply_along_axis(map_class_to_rgb, -1, expanded_indices)
+    if map_class_to_rgb is not None:
+        class_to_rgb_array = np.array([map_class_to_rgb[i] for i in range(len(map_class_to_rgb))])
+        rgb_mask = class_to_rgb_array[mask]
+    
+    # Very slow for large arrays
+    else:
+        # Expand the dimensions of the array
+        expanded_indices = np.expand_dims(mask, axis=-1)
+
+        # Apply the function `map_class_to_rgb` to each 1-D slice along the last axis
+        rgb_mask = np.apply_along_axis(map_class_to_rgb, -1, expanded_indices)
 
     return rgb_mask
 

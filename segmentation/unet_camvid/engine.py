@@ -131,6 +131,7 @@ def train(model: torch.nn.Module,
           writer,
           scaler,
           scheduler,
+          map_class_to_rgb,
           save_model: bool) -> Dict[str, List[float]]:
 
     # Create empty result dict
@@ -228,7 +229,7 @@ def train(model: torch.nn.Module,
 
                 # Print some examples to a folder
                 utils.save_predictions_as_imgs(
-                    val_dataloader, model, num_imgs=5, set_type="val", device=device)
+                    val_dataloader, model, num_imgs=5, set_type="val", map_class_to_rgb=map_class_to_rgb, device=device)
 
                 test_acc_threshold = val_acc["val_acc"]
 
