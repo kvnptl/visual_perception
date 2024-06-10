@@ -51,7 +51,8 @@ def get_loaders(
             batch_size=batch_size,
             shuffle=(set_type == "train"),
             num_workers=num_workers,
-            pin_memory=pin_memory
+            pin_memory=pin_memory,
+            collate_fn=collate_fn
         )
 
         val_dataloader = DataLoader(
@@ -59,7 +60,8 @@ def get_loaders(
         batch_size=batch_size,
         shuffle=(set_type == "train"),
         num_workers=num_workers,
-        pin_memory=pin_memory
+        pin_memory=pin_memory,
+        collate_fn=collate_fn
         )
 
         return train_dataloader, val_dataloader
@@ -70,10 +72,40 @@ def get_loaders(
             batch_size=batch_size,
             shuffle=(set_type == "train"),
             num_workers=num_workers,
-            pin_memory=pin_memory
+            pin_memory=pin_memory,
+            collate_fn=collate_fn
         )
 
         return test_dataloader
+
+def collate_fn(batch):
+    return tuple(zip(*batch))
+
+def collate_fn_2(batch):
+    images = [item[0] for item in batch]
+    targets = [item[1] for item in batch]
+
+    # Stack images
+    images = torch.stack(images)
+
+    # Pad the bounding boxes to have the same number of boxes
+    max_num_boxes = max(len(target['boxes']) for target in targets)
+    padded_targets = []
+
+    for target in targets:
+        boxes = target['boxes']
+        labels = target['labels']
+        
+        # Pad boxes and labels
+        padded_boxes = torch.cat([boxes, torch.zeros((max_num_boxes - boxes.shape[0], 4))], dim=0)
+        padded_labels = torch.cat([labels, torch.zeros((max_num_boxes - labels.shape[0]), dtype=torch.int64)], dim=0)
+        
+        padded_targets.append({'boxes': padded_boxes, 'labels': padded_labels})
+
+    # Stack padded targets
+    targets = {k: torch.stack([d[k] for d in padded_targets]) for k in padded_targets[0]}
+    
+    return images, targets
 
 class PascalVOCDataset(Dataset):
     def __init__(self, df, image_dir, label_dir, transform=None):
@@ -89,9 +121,6 @@ class PascalVOCDataset(Dataset):
         img_path = os.path.join(self.image_dir, self.df.iloc[idx, 0])
         label_path = os.path.join(self.label_dir, self.df.iloc[idx, 1])
 
-        # image = Image.open(img_path)
-        # image = image.convert("RGB")
-        # image = np.array(image)
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
@@ -146,7 +175,7 @@ def main():
     classes, class_to_idx = class_names(class_names_file)
 
     NUM_WORKERS = 4
-    BATCH_SIZE = 1
+    BATCH_SIZE = 8
 
     # Albumentations transforms
     train_transform = A.Compose([
@@ -196,8 +225,8 @@ def main():
     image = image.astype(np.uint8)
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    bboxes = target['boxes'].numpy()[0]
-    labels = target['labels'].numpy()[0]
+    bboxes = target[0]['boxes'].numpy()
+    labels = target[0]['labels'].numpy()
 
     height, width = image.shape[:2]
 
