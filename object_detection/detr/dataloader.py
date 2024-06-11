@@ -17,6 +17,9 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
+# Custom imports
+import utils
+
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
@@ -33,7 +36,7 @@ def get_loaders(
         pin_memory=True,
         split_ratio=0.9  # parameter for split ratio
 ):
-    df = pd.read_csv(dataset_dir, header=None, names=["img", "label"])
+    df = utils.read_csv_file(dataset_dir)
     
     full_dataset = PascalVOCDataset(df, image_dir, label_dir, transform=transform)
     
