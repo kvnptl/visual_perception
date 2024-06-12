@@ -173,3 +173,4 @@ segmentation/unet_camvid/results
 *.zip
 *.pt
 object_detection/vision_transformer_vit/results
+object_detection/detr/results
