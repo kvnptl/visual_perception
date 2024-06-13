@@ -92,9 +92,24 @@ class YOLOv1(nn.Module):
             nn.Linear(in_features=1024 * S * S, out_features=4096),
             nn.Dropout(p=0.5),
             nn.LeakyReLU(negative_slope=0.1),
-            nn.Linear(in_features=4096, out_features=S*S*(C + B*5)), # each cell is 30x1 (20 classes + (1+4) 1st box + (1+4) 2nd box), where (1+4): probability + x1, y1, x2, y2
+            nn.Linear(in_features=4096, out_features=S*S*(C + B*5)), # each cell is 30x1 (20 classes + (1+4) 1st box + (1+4) 2nd box), where (1+4): probability + x1, y1, w, h
         )
 
     def forward(self, x):
         x = self.darknet(x)
         return self.fcs(x)
+
+def main():
+    model = YOLOv1()
+    x = torch.randn((1, 3, 448, 448))
+    
+    from torchinfo import summary
+
+    summary(model=model,
+            input_size=x.shape, # (batch_size, channels, height, width)
+            col_names=["input_size", "output_size", "num_params", "trainable"],
+            col_width=20,
+            row_settings=["var_names"]) 
+
+if __name__ == "__main__":
+    main()
