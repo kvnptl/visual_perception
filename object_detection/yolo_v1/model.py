@@ -109,7 +109,17 @@ def main():
             input_size=x.shape, # (batch_size, channels, height, width)
             col_names=["input_size", "output_size", "num_params", "trainable"],
             col_width=20,
-            row_settings=["var_names"]) 
+            row_settings=["var_names"])
+
+    # Visualize the network (NOTE: requires "apt-get install graphviz")
+    try:
+        from torchview import draw_graph
+        
+        model_graph = draw_graph(model, x, graph_name='yolo_v1_graph')
+        model_graph.resize_graph(scale=1.0)
+        model_graph.visual_graph.render(format='svg')
+    except:
+        pass
 
 if __name__ == "__main__":
     main()
