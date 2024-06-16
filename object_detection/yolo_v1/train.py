@@ -25,8 +25,8 @@ NUM_WORKERS = os.cpu_count()
 PIN_MEMORY = True
 LOAD_MODEL = False
 LOAD_MODEL_FILE = "overfit.pth.tar"
-IMG_DIR = "/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/images"
-LABEL_DIR = "/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/labels"
+IMG_DIR = "/home/kpatel2s/work/kpatel2s_datasets/pascal_voc_dataset/images"
+LABEL_DIR = "/home/kpatel2s/work/kpatel2s_datasets/pascal_voc_dataset/labels"
 
 transform = Compose([transforms.Resize((448, 448)), transforms.ToTensor()])
 
@@ -49,14 +49,14 @@ if LOAD_MODEL:
 
 # Dataset and Dataloader
 train_dataset = VOCDataset(
-    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
+    csv_file="/home/kpatel2s/work/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
     transform=transform,
     img_dir=IMG_DIR,
     label_dir=LABEL_DIR,
 )
 
 test_dataset = VOCDataset(
-    csv_file="/srv/disk1/datasets/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
+    csv_file="/home/kpatel2s/work/kpatel2s_datasets/pascal_voc_dataset/100examples.csv",
     transform=transform,
     img_dir=IMG_DIR,
     label_dir=LABEL_DIR,
